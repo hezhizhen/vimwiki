@@ -16,7 +16,7 @@ endif
 let g:loaded_vimwiki = 1
 
 " Set to version number for release:
-let g:vimwiki_version = '2026.10.24_1'
+let g:vimwiki_version = '2026.10.24_2'
 
 " Get the directory the script is installed in
 let s:plugin_dir = expand('<sfile>:p:h:h')
@@ -109,6 +109,10 @@ function! s:setup_buffer_enter() abort
   endif
 
   call s:set_global_options()
+  " Re-editing a new file can enter its buffer without a BufWinEnter event.
+  if exists('+conceallevel')
+    let &l:conceallevel = vimwiki#vars#get_global('conceallevel')
+  endif
 endfunction
 
 
@@ -321,7 +325,7 @@ augroup vimwiki
 
   " ['.md', '.mdown'] => *.md,*.mdown
   let pat = join(map(s:known_extensions, '"*" . v:val'), ',')
-  exe 'autocmd BufNewFile,BufRead '.pat.' call s:setup_new_wiki_buffer()'
+  exe 'autocmd BufNewFile,BufRead,BufFilePost '.pat.' call s:setup_new_wiki_buffer()'
   exe 'autocmd BufEnter '.pat.' call s:setup_buffer_enter()'
   exe 'autocmd BufLeave '.pat.' call s:setup_buffer_leave()'
   exe 'autocmd BufWinEnter '.pat.' call s:setup_buffer_win_enter()'

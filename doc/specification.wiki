@@ -33,7 +33,7 @@ mode) until the language has become relatively stable.
 The following will describe the individual elements of the vimwiki language.
 It will cover each element's purpose and a clear description of the syntax.
 
-For details on parsing prescedence, see the [[#Specification#Parser Details|companion section]].
+For details on parsing precedence, see the [[#Specification#Parser Details|companion section]].
 
 === Primitives ===
 

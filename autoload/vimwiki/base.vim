@@ -197,8 +197,7 @@ function! vimwiki#base#resolve_link(link_text, ...) abort
   if is_wiki_link && link_text[0] ==# '/'
     if link_text !=# '/'
       if link_text !=# '//' && link_text[0:1] ==# '//'
-        let link_text = resolve(expand(link_text))
-        let link_text = link_text[2:]
+        let link_text = resolve(expand(link_text[2:]))
         let is_absolute_wiki_link = 1
       else
         let link_text = link_text[1:]
@@ -427,7 +426,7 @@ function! vimwiki#base#generate_links(create, ...) abort
   " Param: create: <Bool> Create links or not
   " Param: Optional pattern <String>
   " Get pattern if present
-  " Globlal to script to be passed to closure
+  " Global to script to be passed to closure
   if a:0
     let s:pattern = a:1
   else
@@ -458,7 +457,7 @@ function! vimwiki#base#generate_links(create, ...) abort
         else
           if use_caption
             " switch to [[URL|DESCRIPTION]] if caption is not empty
-            " Link2 is the same for mardown syntax
+            " Link2 is the same for markdown syntax
             let link_tpl = vimwiki#vars#get_syntaxlocal('Link2')
           endif
         endif
@@ -1391,7 +1390,7 @@ endfunction
 
 function! s:open_wiki_buffer(item) abort
   " Edit wiki file.
-  " Called: by rename_file: Usefull for buffer commands
+  " Called: by rename_file: Useful for buffer commands
   call vimwiki#base#edit_file('edit', a:item[0], '')
   if !empty(a:item[1])
     call vimwiki#vars#set_bufferlocal('prev_links', a:item[1], a:item[0])

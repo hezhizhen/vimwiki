@@ -1,5 +1,9 @@
 files.extend-exclude = ["test", "autoload/vimwiki/emoji.vim",  "doc/vimwiki-emoji.txt"]
 
+[default.extend-identifiers]
+clen = "clen"
+matchend = "matchend"
+
 [default.extend-words]
 # For the fo-table
 fo = "fo"

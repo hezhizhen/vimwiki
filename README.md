@@ -287,7 +287,7 @@ to your `.vimrc` to restrict Vimwiki's operation to only those paths listed in
 See [g:vimwiki_global_ext](https://github.com/vimwiki/vimwiki/blob/619f04f89861c58e5a6415a4f83847752928252d/doc/vimwiki.txt#L2631).
 
 if you want to turn off support for other extension(for example, disabling
-accidently creating new wiki and link for normal markdown files), set the
+accidentally creating new wiki and link for normal markdown files), set the
 following option in your `.vimrc` before packadd vimwiki: 
 
 ```vim

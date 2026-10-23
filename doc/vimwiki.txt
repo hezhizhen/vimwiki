@@ -2993,7 +2993,7 @@ Where:
 ------------------------------------------------------------------------------
 *g:vimwiki_schemes_web* *g:vimwiki_schemes_any*
 
-List of know schemes. shemes_web will match if there is a "//" like in
+List of know schemes. schemes_web will match if there is a "//" like in
 https://github.com
 
 Example: ~
@@ -4010,6 +4010,18 @@ master is retained as a legacy mirror of the dev branch.
 This is somewhat experimental, and will probably be refined over time.
 
 
+2026.10.24_2~
+
+Fixed:~
+    * Load wiki commands when another filetype plugin leaves an invalid undo
+      command, and detect wiki buffers after naming or renaming them.
+    * Reset cached wiki indices before rebuilding configuration, and apply
+      conceal settings when re-entering new files.
+    * Resolve absolute local links without losing their leading path.
+    * Restore CI checks on current Vim and Neovim with deterministic tests
+      and an updated spelling checker.
+
+
 2026.10.24_1~
 
 Removed:~
@@ -4568,7 +4580,7 @@ Summary ~
     * Improved handling of special characters and punctuation in filenames and
       urls.
     * Back links command: list links referring to the current page.
-    * Highlighting nonexisted links are off by default.
+    * Highlighting nonexistent links are off by default.
     * Table syntax change. Row separator uses | instead of +.
     * Fold multilined list items.
     * Custom wiki to HTML converters. See |vimwiki-option-custom_wiki2html|.

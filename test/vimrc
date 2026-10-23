@@ -4,6 +4,7 @@
 " Declare tipical Vim preambule
   " vint: -ProhibitSetNoCompatible
   set nocompatible
+  set encoding=utf-8
   filetype plugin indent on
   syntax enable
 
@@ -95,6 +96,7 @@
   set ignorecase
   set smartcase
   set hidden
+  set startofline
   set laststatus=2
   set hlsearch
 

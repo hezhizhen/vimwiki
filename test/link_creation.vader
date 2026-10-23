@@ -50,8 +50,9 @@ Do (Press filename.dot):
   :AssertEqual 'filename.dot.wiki', expand('%:t')\<CR>
   :call DeleteFile('%')\<CR>
 
-Expect (Nothing left):
-  
+Expect (Original buffer keeps the normalized link):
+  filename
+  [[filename.dot]]
 
 # Linkify function {{{1
 # Issue #994
@@ -60,18 +61,26 @@ Expect (Nothing left):
 Given vimwiki (abc def ghi jkl):
   https://github.com/vimwiki/vimwiki
 
+Before (Provide a deterministic response in the scratch buffer):
+  let source_buffer = bufnr('')
+  execute 'buffer ' . bufnr('scratch', 1)
+  command! -buffer -nargs=* -count=1 Nread call setline(1, '<title>Vimwiki test page</title>') | setlocal nomodified
+  execute 'buffer ' . source_buffer
+
 Do(wiki: call linkify):
   :call vimwiki#base#linkify()\<CR>
 
 Expect(Wiki link):
-  [[https://github.com/vimwiki/vimwiki|GitHub - vimwiki/vimwiki: Personal Wiki for Vim]]
+  [[https://github.com/vimwiki/vimwiki|Vimwiki test page]]
 
 Do(md: call linkify):
   :call SetSyntax('markdown')\<CR>
   :call vimwiki#base#linkify()\<CR>
 
 Expect(Markdown link):
-  [GitHub - vimwiki/vimwiki: Personal Wiki for Vim](https://github.com/vimwiki/vimwiki)
+  [Vimwiki test page](https://github.com/vimwiki/vimwiki)
+
+Before:
 
 # Link Normalisation {{{1
 # And configuration
@@ -308,9 +317,9 @@ Do (Linkify all):
   j\<Cr>
   j\<Cr>
 
-Expect (Full Words are made as links, no extension addded . -> space):
-  [part1 part2 part3](part1.part2.part3)
-  [part1 part2 part3](part1.part2.part3.md)
+Expect (Link descriptions preserve dots and extensions):
+  [part1.part2.part3](part1.part2.part3)
+  [part1.part2.part3.md](part1.part2.part3.md)
   [noext](noext)
 
 Given vimwiki (filnames with dots):
@@ -415,9 +424,9 @@ Expect (Markdown links):
   [multiple words](multiple words)
   [let's](let's)
   [let](let)'s
-  [file wiki](file.wiki)
-  [file](file.md)
-  [file mw](file.mw)
+  [file.wiki](file.wiki)
+  [file.md](file.md)
+  [file.mw](file.mw)
 
 Execute (Set syntax to mediawiki):
   call SetSyntax('media')
