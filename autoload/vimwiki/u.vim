@@ -143,19 +143,11 @@ endfunction
 
 function! vimwiki#u#os_name() abort
   " Returns: OS name, human readable
-  if vimwiki#u#is_windows()
-    return 'Windows'
-  elseif vimwiki#u#is_macos()
+  if vimwiki#u#is_macos()
     return 'Mac'
   else
     return 'Linux'
   endif
-endfunction
-
-
-function! vimwiki#u#is_windows() abort
-  " Check if OS is windows
-  return has('win32') || has('win64') || has('win95') || has('win16')
 endfunction
 
 

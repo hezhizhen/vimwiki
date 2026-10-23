@@ -78,6 +78,8 @@ The result should look something like:
 
 ## Installation
 
+This fork targets macOS and Linux. Windows support has been removed.
+
 VimWiki has been tested on **Vim >= 7.3**. It may work on older versions but
 will not be officially supported.  It is known to work on NeoVim, although
 it is likely to have
