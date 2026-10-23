@@ -4015,8 +4015,9 @@ This is somewhat experimental, and will probably be refined over time.
 Fixed:~
     * Load wiki commands when another filetype plugin leaves an invalid undo
       command, and detect wiki buffers after naming or renaming them.
-    * Reset cached wiki indices before rebuilding configuration, and apply
-      conceal settings when re-entering new files.
+    * Reset cached wiki indices before rebuilding configuration, recompute
+      them from the target buffer's path, and apply conceal settings when
+      re-entering new files.
     * Resolve absolute local links without losing their leading path.
     * Restore CI checks on current Vim and Neovim with deterministic tests
       and an updated spelling checker.

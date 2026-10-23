@@ -36,6 +36,33 @@ Execute (Reinitialize the wiki list while a temporary wiki buffer stays open):
   AssertEqual 'default', vimwiki#vars#get_wikilocal('syntax')
   bwipeout!
 
+Execute (Recompute hidden buffer wiki indices from their own paths after reinitialization):
+  edit $HOME/testwiki/cached_default.wiki
+  let default_buffer = bufnr('')
+  AssertEqual 0, vimwiki#vars#get_bufferlocal('wiki_nr')
+  edit $HOME/testmarkdown/cached_markdown.md
+  let markdown_buffer = bufnr('')
+  AssertEqual 1, vimwiki#vars#get_bufferlocal('wiki_nr')
+  call vimwiki#vars#init()
+  let directory = getcwd()
+  try
+    lcd $HOME/testwiki
+    AssertEqual 0, vimwiki#vars#get_bufferlocal('wiki_nr', default_buffer)
+    AssertEqual 1, vimwiki#vars#get_bufferlocal('wiki_nr')
+    AssertEqual markdown_buffer, bufnr('')
+    enew
+    let current_buffer = bufnr('')
+    call vimwiki#vars#init()
+    AssertEqual 0, vimwiki#vars#get_bufferlocal('wiki_nr', bufname(default_buffer))
+    AssertEqual 1, vimwiki#vars#get_bufferlocal('wiki_nr', bufname(markdown_buffer))
+    AssertEqual -1, vimwiki#vars#get_bufferlocal('wiki_nr')
+    AssertEqual current_buffer, bufnr('')
+  finally
+    execute 'lcd ' . fnameescape(directory)
+    execute 'bwipeout! ' . default_buffer
+    execute 'bwipeout! ' . markdown_buffer
+  endtry
+
 Given (Void for Accessing other files within vimwiki #979 {{{1):
 
 
