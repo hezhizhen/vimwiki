@@ -292,7 +292,6 @@ Expect (Vimwiki links):
 ###################################
 ###################################
 ###################################
-# Commented out as butsetvar of the var prev_links is removing the list info at change of file for old Vim
 
 
 

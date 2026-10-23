@@ -186,15 +186,6 @@ function! vimwiki#u#reload_regexes_custom() abort
 endfunction
 
 
-function! vimwiki#u#sw() abort
-  " Backward compatible version of the built-in function shiftwidth()
-  if exists('*shiftwidth')
-    return shiftwidth()
-  else
-    return &shiftwidth
-  endif
-endfunc
-
 function! vimwiki#u#map_key(mode, key, plug, ...) abort
   " a:mode single character indicating the mode as defined by :h maparg
   " a:key the key sequence to map
@@ -274,13 +265,7 @@ function! vimwiki#u#get_punctuation_regex() abort
   " Called: normalize and unnormalize anchor
   " From: https://gist.github.com/asabaylus/3071099#gistcomment-2563127
   " Faster
-  " Unused now
-  if v:version <= 703
-    " Retrocompatibility: Get invalid range for vim 7.03
-    return '[^0-9a-zA-Z_ \-]'
-  else
-    return '[^0-9a-zA-Z\u4e00-\u9fff_ \-]'
-  endif
+  return '[^0-9a-zA-Z\u4e00-\u9fff_ \-]'
 endfunction
 
 

@@ -17,7 +17,7 @@ Execute (Set syntax markdown):
 Do (JJJJ):
   JJJJ
   0y$
-  :call AssertIfVersion(704, '* [ ] Top Level Child 1 Child 2 Post space', @")\<Cr>
+  :AssertEqual '* [ ] Top Level Child 1 Child 2 Post space', @"\<Cr>
 
 
 
@@ -35,10 +35,10 @@ Do (JjJ):
   JjJ
   gg
   0y$
-  :call AssertIfVersion(704, '* one two', @")\<Cr>
+  :AssertEqual '* one two', @"\<Cr>
   G
   0y$
-  :call AssertIfVersion(704, '- three for', @")\<Cr>
+  :AssertEqual '- three for', @"\<Cr>
 
 
 

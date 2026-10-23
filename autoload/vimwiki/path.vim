@@ -147,10 +147,6 @@ function! vimwiki#path#mkdir(path, ...) abort
   if isdirectory(path)
     return 1
   else
-    if !exists('*mkdir')
-      return 0
-    endif
-
     let path = vimwiki#path#chomp_slash(path)
     if a:0 && a:1 && input('Vimwiki: Make new directory: '.path."\n [y]es/[N]o? ") !~? '^y'
       return 0

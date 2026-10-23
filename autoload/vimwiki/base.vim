@@ -1889,12 +1889,10 @@ function! vimwiki#base#rename_file(...) abort
   " TODO Check new_file is in a wiki dir and warn user if not
   " Create new directory if needed
   let new_dir = fnamemodify(new_fname, ':h')
-  if exists('*mkdir')
-    " Sometimes complaining E739 if directory exists
-    try
-      call mkdir(new_dir, 'p')
-    catch | endtry
-  endif
+  " Sometimes complaining E739 if directory exists
+  try
+    call mkdir(new_dir, 'p')
+  catch | endtry
 
   " Rename wiki link file
   try
@@ -1912,9 +1910,7 @@ function! vimwiki#base#rename_file(...) abort
 
   " Save current buffer: [file_name, previous_name, buffer_number]
   let buf_old_info = [expand('%:p'), vimwiki#vars#get_bufferlocal('prev_links'), bufnr('%')]
-  if v:version > 800 || has('patch-8.0.0083')
-    let win_old_id = win_getid()
-  endif
+  let win_old_id = win_getid()
 
   " Get all wiki buffer
   let blist = s:get_wiki_buffers()
@@ -1955,9 +1951,7 @@ function! vimwiki#base#rename_file(...) abort
   " Change old_buffer by new buffer in all window
   windo if bufnr('%') == buf_old_info[2] | exe 'b ' . buf_new_nb | endif
   " Goto the window I belong
-  if v:version > 800 || has('patch-8.0.0083')
-    call win_gotoid(win_old_id)
-  endif
+  call win_gotoid(win_old_id)
 
   " Wipeout the old buffer: avoid surprises <= If it is not the same
   if buf_old_info[2] != buf_new_nb
@@ -2542,7 +2536,7 @@ function! vimwiki#base#table_of_contents(create) abort
     " -- and create line list
     let lines = []
     let startindent = repeat(' ', vimwiki#lst#get_list_margin())
-    let indentstring = repeat(' ', vimwiki#u#sw())
+    let indentstring = repeat(' ', shiftwidth())
     let bullet = vimwiki#lst#default_symbol().' '
     " Keep previous anchor => if redundant => add suffix -2
     let previous_anchors = {}

@@ -1,5 +1,33 @@
 # Task List with commands
 
+Given vimwiki (Done items around a single-line range):
+  * [X] Before range
+  * [X] In range
+  * [X] After range
+
+Execute (Use the default wiki syntax):
+  call SetSyntax('default')
+
+Do (Remove done items from an explicit single-line range):
+  :2VimwikiRemoveDone\<Enter>
+
+Expect (Only the addressed line is removed):
+  * [X] Before range
+  * [X] After range
+
+Given vimwiki (Done items around a multi-line range):
+  * [X] Before range
+  * [X] In range 1
+  * [X] In range 2
+  * [X] After range
+
+Do (Remove done items from an explicit multi-line range):
+  :2,3VimwikiRemoveDone\<Enter>
+
+Expect (Only the addressed lines are removed):
+  * [X] Before range
+  * [X] After range
+
 Given vimwiki (simple list):
   * [X] Done 1
   * [ ] Todo 1

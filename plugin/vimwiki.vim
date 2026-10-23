@@ -8,10 +8,15 @@
 if exists('g:loaded_vimwiki') || &compatible
   finish
 endif
+
+if has('nvim') ? !has('nvim-0.12.6') : !has('patch-9.2.0')
+  echoerr 'Vimwiki requires the latest stable Vim or Neovim (Vim 9.2+ / Neovim 0.12.6+).'
+  finish
+endif
 let g:loaded_vimwiki = 1
 
 " Set to version number for release:
-let g:vimwiki_version = '2026.10.23'
+let g:vimwiki_version = '2026.10.24'
 
 " Get the directory the script is installed in
 let s:plugin_dir = expand('<sfile>:p:h:h')
@@ -320,9 +325,7 @@ augroup vimwiki
   exe 'autocmd BufEnter '.pat.' call s:setup_buffer_enter()'
   exe 'autocmd BufLeave '.pat.' call s:setup_buffer_leave()'
   exe 'autocmd BufWinEnter '.pat.' call s:setup_buffer_win_enter()'
-  if exists('##DiffUpdated')
-    exe 'autocmd DiffUpdated '.pat.' call s:setup_buffer_win_enter()'
-  endif
+  exe 'autocmd DiffUpdated '.pat.' call s:setup_buffer_win_enter()'
   " automatically generate a level 1 header for new files
   exe 'autocmd BufNewFile '.pat.' call s:create_h1(expand("%:p"))'
   " Format tables when exit from insert mode. Do not use textwidth to

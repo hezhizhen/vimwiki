@@ -44,11 +44,9 @@ Given vimwiki (Multiple line blockquote):
   > est sed facilisis. Sed imperdiet massa tellus, eu fermentum felis fringilla
   > vel.
 
-Execute (no JJ && Assert for Version > 7.3):
+Execute (Join blockquote lines):
   normal JJ
-  if v:version > 703
-    AssertEqual getline(1), '> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam faucibus rhoncus est sed facilisis. Sed imperdiet massa tellus, eu fermentum felis fringilla vel.'
-  endif
+  AssertEqual getline(1), '> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam faucibus rhoncus est sed facilisis. Sed imperdiet massa tellus, eu fermentum felis fringilla vel.'
 
 ################################################################################
 Execute (Log):

@@ -1,6 +1,4 @@
 ---
-# Copied from previous .travis.yml by tinmarino the 2023-03-09
-
 # Commented out to avoid verbosity on github commit status
 name: CI
 
@@ -56,60 +54,52 @@ jobs:
 
 
   Check:
-    name: Check ${{ matrix.opt }}
+    name: Check latest ${{ matrix.editor }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        opt: [
-          # "vint",
-
-          "-n vim_7.3.429",
-          "-n vim_8.1.0519",
-          # TODO add me when test works on Vim, 9.0
-          # -- Currently I experienced some surprised due to defaults
-          # -- tinmarino 2023-03-10
-          # "-n v9.0.1396",
-
-          "-n nvim_0.3.8",
-
-          # Cannot quote as it is expanded from $OPT after quote removal
-          # So I decided to escape the *
-          "-n vim_7.4.1099 -f '[a-k]*.vader'",
-          "-n vim_7.4.1546 -f 'l*.vader'",
-          "-n vim_8.0.0027 -f '[m-z]*.vader'",
-        ]
+        editor: [vim, nvim]
     steps:
       # This action is required to fetch the code to test
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      # This action is crafting the docker image from the root Docker file
-      # or will use it is exists in cache
-      # It caches in GHA for GitHub Actions with 10 Gb
-      # See: https://github.com/moby/buildkit#github-actions-cache-experimental
-      # Examples at: https://github.com/docker/build-push-action/blob/
-      # e27bcee4eb9e7b4bc168418e3364c4482120393a/docs/advanced/cache.md
-      - uses: docker/setup-buildx-action@v2
-      - uses: docker/build-push-action@v2
+      - name: Resolve current editor releases
+        id: editors
+        run: |
+          vim_version=$(git ls-remote --tags --refs \
+            https://github.com/vim/vim.git 'v[0-9]*' \
+            | sed 's,.*refs/tags/,,' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' \
+            | sort -V | tail -n 1)
+          nvim_version=$(curl -fsSL \
+            https://api.github.com/repos/neovim/neovim/releases/latest \
+            | python3 -c \
+              'import json, sys; print(json.load(sys.stdin)["tag_name"])')
+          test -n "$vim_version"
+          test -n "$nvim_version"
+          printf 'vim=%s\nnvim=%s\n' "$vim_version" "$nvim_version" \
+            >> "$GITHUB_OUTPUT"
+
+      # Cache the image using the editor tags resolved for this run.
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/build-push-action@v7
         with:
           context: .
           push: false
           tags: vimwiki:latest
           load: true
+          build-args: |
+            VIM_VERSION=${{ steps.editors.outputs.vim }}
+            NVIM_VERSION=${{ steps.editors.outputs.nvim }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
 
       - name: Check
         run: |
-          pushd test
-          if [[ "$OPT" == 'vint' ]]; then
-            bash run_tests.sh -v -t vint;
-          else
-            bash run_tests.sh -v -t vader $OPT;
-          fi
-          popd
+          cd test
+          bash run_tests.sh -v -t vader -n "$EDITOR"
         env:
-          OPT: ${{ matrix.opt }}
+          EDITOR: ${{ matrix.editor }}

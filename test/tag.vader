@@ -257,7 +257,7 @@ Expect (Correctly formatted tags file):
   !_TAG_PROGRAM_AUTHOR	Vimwiki
   !_TAG_PROGRAM_NAME	Vimwiki Tags
   !_TAG_PROGRAM_URL	https://github.com/vimwiki/vimwiki
-  !_TAG_PROGRAM_VERSION	2026.10.23
+  !_TAG_PROGRAM_VERSION	2026.10.24
   second-tag	Test-Tag.md	13;"	vimwiki:Test-Tag\tTest-Tag#second-tag\tTest-Tag#second-tag
   test-tag	Test-Tag.md	5;"	vimwiki:Test-Tag\tTest-Tag#a-header\tA header
   top-tag	Test-Tag.md	1;"	vimwiki:Test-Tag\tTest-Tag\tTest-Tag
@@ -523,22 +523,13 @@ Execute (Assert some file info for #1316):
 
 Do (Append something at first_tag):
   :edit $HOME/testmarkdown/Test-Tag-issue-1316-bis.md\<CR>
-# Some bug with loclist for vim7.3 and vim8.0
-  :if v:version > 810\<Cr>
-    VimwikiSearchTags first_tag\<Cr>
-  else\<Cr>
-    2\<Cr>
-  endif\<Cr>
+  :VimwikiSearchTags first_tag\<Cr>
   A Content1\<Esc>
 
 
 Do (Append something at mono tag):
   :edit $HOME/testmarkdown/Test-Tag-issue-1316-bis.md\<CR>
-  :if v:version > 810\<Cr>
-    VimwikiSearchTags mono\<Cr>
-  else\<Cr>
-    3\<Cr>
-  endif\<Cr>
+  :VimwikiSearchTags mono\<Cr>
   A Content2\<Esc>
 
 

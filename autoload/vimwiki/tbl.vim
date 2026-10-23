@@ -28,29 +28,6 @@ function! s:r_sep() abort
   return res
 endfunction
 
-function! s:wide_len(str) abort
-  " vim73 has new function that gives correct string width.
-  if exists('*strdisplaywidth')
-    return strdisplaywidth(a:str)
-  endif
-
-  " get str display width in vim ver < 7.2
-  if !vimwiki#vars#get_global('CJK_length')
-    let ret = strlen(substitute(a:str, '.', 'x', 'g'))
-  else
-    let savemodified = &modified
-    let save_cursor = getpos('.')
-    exe "norm! o\<esc>"
-    call setline(line('.'), a:str)
-    let ret = virtcol('$') - 1
-    d
-    call setpos('.', save_cursor)
-    let &modified = savemodified
-  endif
-  return ret
-endfunction
-
-
 function! s:cell_splitter() abort
   return '\s*'.s:r_sep().'\s*'
 endfunction
@@ -349,9 +326,9 @@ function! s:get_cell_max_lens(lnum, ...) abort
     for idx in range(len(cells))
       let value = cells[idx]
       if has_key(max_lens, idx)
-        let max_lens[idx] = max([s:wide_len(value), max_lens[idx]])
+        let max_lens[idx] = max([strdisplaywidth(value), max_lens[idx]])
       else
-        let max_lens[idx] = s:wide_len(value)
+        let max_lens[idx] = strdisplaywidth(value)
       endif
     endfor
   endfor
@@ -451,7 +428,7 @@ endfunction
 function! s:fmt_cell(cell, max_len, align) abort
   let cell = ' '.a:cell.' '
 
-  let diff = a:max_len - s:wide_len(a:cell)
+  let diff = a:max_len - strdisplaywidth(a:cell)
   if diff == 0 && empty(a:cell)
     let diff = 1
   endif

@@ -461,7 +461,7 @@ function! vimwiki#diary#generate_diary_section() abort
           call add(lines, repeat(' ', vimwiki#lst#get_list_margin()).bullet.entry)
 
           let startindent = repeat(' ', vimwiki#lst#get_list_margin())
-          let indentstring = repeat(' ', vimwiki#u#sw())
+          let indentstring = repeat(' ', shiftwidth())
 
           for [depth, subcap] in captions['rest']
             if empty(subcap)
