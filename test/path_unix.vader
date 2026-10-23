@@ -1,0 +1,24 @@
+# Paths on macOS and Linux use / as the directory separator.
+
+Execute (Normalize and join Unix paths):
+  AssertEqual '/wiki/notes', vimwiki#path#chomp_slash('/wiki/notes///')
+  AssertEqual '/wiki/page.wiki', vimwiki#path#normalize('/wiki/notes/../page.wiki')
+  AssertEqual '/wiki/page.wiki', vimwiki#path#join_path('/wiki///', '//page.wiki')
+  AssertEqual '../other/page.wiki', vimwiki#path#relpath('/wiki/notes', '/wiki/other/page.wiki')
+  AssertEqual './', vimwiki#path#relpath('/wiki', '/wiki')
+  AssertEqual 0, vimwiki#path#is_equal('/wiki/Page', '/wiki/page')
+
+Execute (Recognize Unix absolute paths and remote files):
+  Assert vimwiki#path#is_absolute('/wiki/page.wiki')
+  Assert vimwiki#path#is_absolute('~/wiki/page.wiki')
+  Assert vimwiki#path#is_absolute('scp://host/wiki/page.wiki')
+  Assert !vimwiki#path#is_absolute('notes/page.wiki')
+  Assert vimwiki#path#is_link_to_dir('notes/')
+
+Execute (Keep literal backslashes in Unix filenames):
+  AssertEqual '/wiki/notes\', vimwiki#path#chomp_slash('/wiki/notes\')
+  AssertEqual '/wiki/notes\page.wiki', vimwiki#path#path_norm('/wiki//notes\page.wiki')
+  " relpath expands its inputs, so escape the literal backslash.
+  AssertEqual 'notes\page.wiki', vimwiki#path#relpath('/wiki', '/wiki/notes\\page.wiki')
+  AssertEqual 'notes\draft/', vimwiki#base#subdir('/wiki/', '/wiki/notes\draft/page.wiki')
+  Assert !vimwiki#path#is_link_to_dir('notes\')

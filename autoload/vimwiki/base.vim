@@ -45,7 +45,6 @@ function! vimwiki#base#file_pattern(files) abort
   "   names that are compatible with any external restrictions that they
   "   encounter (e.g. filesystem, wiki conventions, other syntaxes, ...).
   "   See: https://github.com/vimwiki-backup/vimwiki/issues/316
-  " Change / to [/\\] to allow "Windows paths"
   return '\V\%('.join(a:files, '\|').'\)\m'
 endfunction
 
@@ -62,8 +61,8 @@ function! vimwiki#base#subdir(path, filename) abort
     let filename = a:filename
   endif
   let idx = 0
-  let pathelement = split(path, '[/\\]')
-  let fileelement = split(filename, '[/\\]')
+  let pathelement = split(path, '/')
+  let fileelement = split(filename, '/')
   let minlen = min([len(pathelement), len(fileelement)])
   let p = fileelement[:]
   while pathelement[idx] ==? fileelement[idx]
@@ -309,35 +308,6 @@ endfunction
 function! vimwiki#base#system_open_link(url) abort
   " Open Link with OS handler (like gx)
   " handlers
-  function! s:win32_handler(url) abort
-    "Disable shellslash for cmd and command.com, but enable for all other shells
-    "See Issue #560
-    if (&shell =~? 'cmd') || (&shell =~? 'command.com')
-
-      if exists('+shellslash')
-        let old_ssl = &shellslash
-        set noshellslash
-        let url = shellescape(a:url, 1)
-        let &shellslash = old_ssl
-      else
-        let url = shellescape(a:url, 1)
-      endif
-      execute 'silent ! start "Title" /B ' . url
-
-    else
-
-      if exists('+shellslash')
-        let old_ssl = &shellslash
-        set shellslash
-        let url = shellescape(a:url, 1)
-        let &shellslash = old_ssl
-      else
-        let url = shellescape(a:url, 1)
-      endif
-      execute 'silent ! start ' . url
-
-    endif
-  endfunction
   function! s:macunix_handler(url) abort
     call system('open ' . shellescape(a:url).' &')
   endfunction
@@ -345,10 +315,7 @@ function! vimwiki#base#system_open_link(url) abort
     call system('xdg-open ' . shellescape(a:url).' >/dev/null 2>&1 &')
   endfunction
   try
-    if vimwiki#u#is_windows()
-      call s:win32_handler(a:url)
-      return
-    elseif vimwiki#u#is_macos()
+    if vimwiki#u#is_macos()
       call s:macunix_handler(a:url)
       return
     else
@@ -557,11 +524,6 @@ function! vimwiki#base#backlinks() abort
     for source_file in wikifiles
       let links = s:get_links(source_file, idx)
       for [target_file, _, lnum, col] in links
-        if vimwiki#u#is_windows()
-          " TODO this is a temporary fix - see issue #478
-          let target_file = substitute(target_file, '/', '\', 'g')
-          let current_filename = substitute(current_filename, '/', '\', 'g')
-        endif
         " don't include links from the current file to itself
         if vimwiki#path#is_equal(target_file, current_filename) &&
               \ !vimwiki#path#is_equal(target_file, source_file)
@@ -1337,10 +1299,8 @@ function! s:update_wiki_links(wiki_nr, dir, old_url, new_url) abort
     " TODO this may be helped by path_to_regex
     " Start, Read param
     let old_url_r = a:old_location
-    " Replace / -> [\\/]
-    let old_url_r = substitute(old_url_r, '/', '[\\\\/]', 'g')
     " Add potential  ./
-    let old_url_r = '\%(\.[/\\]\)\?' . old_url_r
+    let old_url_r = '\%(\./\)\?' . old_url_r
     " Compute old url regex with filename between \zs and \ze
     let old_url_r = vimwiki#base#apply_template(
           \ vimwiki#vars#get_syntaxlocal('WikiLinkMatchUrlTemplate', vimwiki#vars#get_wikilocal('syntax', a:wiki_nr))
@@ -1359,11 +1319,11 @@ function! s:update_wiki_links(wiki_nr, dir, old_url, new_url) abort
     let dir_rel_fsource = vimwiki#path#relpath(fsource_rel_root, dir_rel_root)
     " TODO get relpath coherent (and remove next 2 stuff)
     " Remove the trailing ./
-    if dir_rel_fsource =~# '.[/\\]$'
+    if dir_rel_fsource =~# './$'
       let dir_rel_fsource = dir_rel_fsource[:-3]
     endif
     " Append a / if needed
-    if !empty(dir_rel_fsource) && dir_rel_fsource !~# '[/\\]$'
+    if !empty(dir_rel_fsource) && dir_rel_fsource !~# '/$'
       let dir_rel_fsource .= '/'
     endif
 
@@ -1874,7 +1834,7 @@ function! s:input_rename_file() abort
   let new_link = input('Enter new name: ')
 
   " Guard: Check link
-  if new_link =~# '[/\\]'
+  if new_link =~# '/'
     call vimwiki#u#error('Cannot rename to a filename with path!')
     return
   endif
@@ -3013,7 +2973,6 @@ function! vimwiki#base#linkify() abort
   exe 'sil! ' . scratch_buf . 'buffer'
 
   " Load web page into scratch buffer using Nread with mode=2
-  " FIXME: on Windows, with vim 7/8 (not with nvim), makes the cmd.exe window show up (annoying)
   exe 'sil! :2Nread ' . @u
 
   " Extract title from html

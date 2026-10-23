@@ -105,6 +105,8 @@ documents to help you organize your notes, documentation, and tasks.
 ==============================================================================
 2. Prerequisites                                       *vimwiki-prerequisites*
 
+This fork targets macOS and Linux. Windows support has been removed.
+
 Make sure you have these settings in your vimrc file: >
     set nocompatible
     filetype plugin on
@@ -1159,14 +1161,13 @@ External files~
 The "file:" and "local:" schemes allow you to directly link to arbitrary
 resources using absolute or relative paths: >
   [[file:/home/somebody/a/b/c/music.mp3]]
-  [[file:C:/Users/somebody/d/e/f/music.mp3]]
   [[file:~/a/b/c/music.mp3]]
   [[file:../assets/data.csv|Important Data]]
-  [[local:C:/Users/somebody/d/e/f/music.mp3]]
+  [[local:/home/somebody/d/e/f/music.mp3]]
   [[file:/home/user/documents/|Link to a directory]]
 
-These links are opened with the system command, i.e. !xdg-open (Linux), !open
-(Mac), or !start (Windows).  To customize this behavior, see
+These links are opened with the system command, i.e. !xdg-open (Linux) or !open
+(macOS).  To customize this behavior, see
 |VimwikiLinkHandler|.
 
 In Vim, "file:" and "local:" behave the same, i.e. you can use them with both
@@ -3206,8 +3207,7 @@ something else: >
 
   function! VimwikiLinkHandler(link)
     try
-      let browser = 'C:\Program Files\Firefox\firefox.exe'
-      execute '!start "'.browser.'" ' . a:link
+      call system('open -a Firefox ' . shellescape(a:link))
       return 1
     catch
       echo "This can happen for a variety of reasons ..."
@@ -3323,23 +3323,6 @@ Value           Description~
 1               Disable table auto formatting for the last column.
 
 Default: 0
-
-
-------------------------------------------------------------------------------
-*g:vimwiki_w32_dir_enc*
-
-Convert directory name from current 'encoding' into 'g:vimwiki_w32_dir_enc'
-before it is created.
-
-If you have 'enc=utf-8' and set up >
-    let g:vimwiki_w32_dir_enc = 'cp1251'
-<
-then following the next link with <CR>: >
-    [[привет/мир]]
->
-would convert utf-8 'привет' to cp1251 and create directory with that name.
-
-Default: ''
 
 
 ------------------------------------------------------------------------------
@@ -4021,6 +4004,7 @@ Contributors and their Github usernames in roughly chronological order:
     - Alex Claman (@claman)
     - @qadzek
     - Nathan Giard (@giardn)
+    - @hezhizhen
 
 
 ==============================================================================
@@ -4038,6 +4022,14 @@ are accepted, they will merge directly to dev, which is now the main branch.
 master is retained as a legacy mirror of the dev branch.
 
 This is somewhat experimental, and will probably be refined over time.
+
+
+2026.10.23~
+
+Removed:~
+    * Windows support, including link handlers, path separator conversion,
+      the g:vimwiki_w32_dir_enc option, and Windows-specific test runner setup.
+      This fork now targets macOS and Linux.
 
 
 2026.04.08~

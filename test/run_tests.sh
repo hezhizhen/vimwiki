@@ -21,8 +21,7 @@ printHelp() {
     -h (Help) Print help message
 
     -n (versioN) Specify vim/nvim version to run tests for.
-       Specify "local" to run on your current vim install
-       for example on Windows.
+       Specify "local" to run on your current vim install.
        Multiple versions can be specified by quoting the value and
        separating versions with a space. E.g. -n "vim1 vim2".
        Default is all available versions.
@@ -42,8 +41,6 @@ printHelp() {
     E.g. On Linux
     bash run_tests.sh -v -t vader -n "vim_7.4.1099 vim_8.1.0519" -f link_creation.vader issue_markdown.vader
 
-    E.g. On Windows
-    bash run_tests.sh -v -t vader -n local -f z_success.vader | cat
     EOF
 
   exit 0
@@ -59,13 +56,6 @@ run_test(){
 
   # Hook ctrl-c or ctrl-z to stop tests
   trap exit 1 SIGINT SIGTERM
-  
-  # For windows: Cmder bash is appending busybox to the path and
-  #   and a smlll vim is included, so that override the windows path vim
-  if [[ -v OLD_PATH ]]; then
-    echo "Setting path from OLD_PATH : $OLD_PATH"
-    export PATH="$OLD_PATH"
-  fi
   
   # WORK
   parse_argument "$@"; ((res |= $?))

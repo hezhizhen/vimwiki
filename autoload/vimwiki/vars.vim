@@ -191,7 +191,6 @@ function! s:get_default_global() abort
         \ 'user_htmls': {'type': type(''), 'default': ''},
         \ 'valid_html_tags': {'type': type(''), 'default':
         \   'b,i,s,u,sub,sup,kbd,br,hr,div,center,strong,em'},
-        \ 'w32_dir_enc': {'type': type(''), 'default': ''},
         \ }
 endfunction
 
@@ -630,7 +629,7 @@ function! s:normalize_wikilocal_settings() abort
       let wiki_settings['path_html'] = s:normalize_path(path_html)
     else
       let wiki_settings['path_html'] = s:normalize_path(
-            \ substitute(wiki_settings['path'], '[/\\]\+$', '', '').'_html/')
+            \ substitute(wiki_settings['path'], '/\+$', '', '').'_html/')
     endif
 
     let wiki_settings['template_path'] = s:normalize_path(wiki_settings['template_path'])
@@ -657,8 +656,8 @@ endfunction
 function! s:normalize_path(path) abort
   " Helper path
   " TODO move to path: Conflict with: vimwiki#path#path_norm && vimwiki#path#normalize
-  " trim trailing / and \ because otherwise resolve() doesn't work quite right
-  let path = substitute(a:path, '[/\\]\+$', '', '')
+  " trim trailing / because otherwise resolve() doesn't work quite right
+  let path = substitute(a:path, '/\+$', '', '')
   if path !~# '^scp:'
     return resolve(expand(path)).'/'
   else
