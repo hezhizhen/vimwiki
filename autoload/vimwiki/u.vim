@@ -46,12 +46,6 @@ function! vimwiki#u#error(msg) abort
   call vimwiki#u#echo('Error: ' . a:msg, 'Error', 'msg')
 endfunction
 
-function! vimwiki#u#deprecate(old, new) abort
-  " Warn: deprecated feature: old -> new
-  call vimwiki#u#warn('Deprecated: ' . a:old . ' is deprecated and '
-        \ . 'will be removed in future versions. Use ' . a:new . ' instead.')
-endfunction
-
 function! vimwiki#u#get_selection(...) abort
   " Get visual selection text content, optionally replace its content
   " :param: Text to replace selection

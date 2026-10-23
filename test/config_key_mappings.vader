@@ -1,0 +1,65 @@
+# Current key mapping settings replace the removed global options.
+
+Given vimwiki (A wiki buffer):
+  A wiki page
+
+Before (Reset buffer mappings and settings):
+  nmapclear <buffer>
+  imapclear <buffer>
+  unlet! b:did_ftplugin
+  let g:vimwiki_key_mappings = {}
+
+After (Restore default settings):
+  unlet! g:vimwiki_key_mappings g:vimwiki_table_mappings g:vimwiki_use_mouse
+  call ReloadVimwiki()
+
+Execute (Removed commands are unavailable and their replacements exist):
+  set filetype=vimwiki
+  AssertEqual 0, exists(':VimwikiDeleteLink')
+  AssertEqual 0, exists(':VimwikiRenameLink')
+  AssertEqual 0, exists(':VimwikiGenerateTags')
+  AssertEqual 2, exists(':VimwikiDeleteFile')
+  AssertEqual 2, exists(':VimwikiRenameFile')
+  AssertEqual 2, exists(':VimwikiGenerateTagLinks')
+
+Execute (Removed global options do not change default mappings):
+  let g:vimwiki_table_mappings = 0
+  let g:vimwiki_use_mouse = 1
+  call vimwiki#vars#init()
+  set filetype=vimwiki
+  AssertEqual '<Plug>VimwikiTableNextCell', maparg('<Tab>', 'i')
+  AssertEqual 0, get(maparg('<2-LeftMouse>', 'n', 0, 1), 'buffer', 0)
+  Assert !has_key(g:vimwiki_global_vars, 'table_mappings')
+  Assert !has_key(g:vimwiki_global_vars, 'use_mouse')
+
+Execute (Current settings can disable table mappings and enable mouse mappings):
+  let g:vimwiki_table_mappings = 1
+  let g:vimwiki_use_mouse = 0
+  let g:vimwiki_key_mappings = {'table_mappings': 0, 'mouse': 1}
+  call vimwiki#vars#init()
+  set filetype=vimwiki
+  AssertEqual 0, get(maparg('<Tab>', 'i', 0, 1), 'buffer', 0)
+  AssertEqual 0, get(maparg('<S-Tab>', 'i', 0, 1), 'buffer', 0)
+  Assert !empty(maparg('<2-LeftMouse>', 'n'))
+
+Execute (Current settings can enable table mappings and disable mouse mappings):
+  let g:vimwiki_table_mappings = 0
+  let g:vimwiki_use_mouse = 1
+  let g:vimwiki_key_mappings = {'table_mappings': 1, 'mouse': 0}
+  call vimwiki#vars#init()
+  set filetype=vimwiki
+  AssertEqual '<Plug>VimwikiTableNextCell', maparg('<Tab>', 'i')
+  AssertEqual '<Plug>VimwikiTablePrevCell', maparg('<S-Tab>', 'i')
+  AssertEqual 0, get(maparg('<2-LeftMouse>', 'n', 0, 1), 'buffer', 0)
+
+Execute (Disabling all mappings overrides individual groups):
+  let g:vimwiki_use_mouse = 1
+  let g:vimwiki_key_mappings = {'all_maps': 0, 'table_mappings': 1, 'mouse': 1}
+  call vimwiki#vars#init()
+  set filetype=vimwiki
+  AssertEqual 0, get(maparg('<Tab>', 'i', 0, 1), 'buffer', 0)
+  AssertEqual 0, get(maparg('<S-Tab>', 'i', 0, 1), 'buffer', 0)
+  AssertEqual 0, get(maparg('<2-LeftMouse>', 'n', 0, 1), 'buffer', 0)
+  for enabled in values(vimwiki#vars#get_global('key_mappings'))
+    AssertEqual 0, enabled
+  endfor
