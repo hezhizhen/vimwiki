@@ -1632,7 +1632,8 @@ function! vimwiki#vars#get_bufferlocal(key, ...) abort
   if type(value) != 1 || value !=# '/\/\'
     return value
   elseif a:key ==# 'wiki_nr'
-    call setbufvar(buffer, 'vimwiki_wiki_nr', vimwiki#base#find_wiki(expand('%:p')))
+    let path = expand('#' . bufnr(buffer) . ':p')
+    call setbufvar(buffer, 'vimwiki_wiki_nr', vimwiki#base#find_wiki(path))
   elseif a:key ==# 'subdir'
     call setbufvar(buffer, 'vimwiki_subdir', vimwiki#base#current_subdir())
   elseif a:key ==# 'invsubdir'
