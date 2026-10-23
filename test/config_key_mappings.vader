@@ -4,7 +4,7 @@ Given vimwiki (A wiki buffer):
   A wiki page
 
 Before (Reset buffer mappings and settings):
-  nmapclear <buffer>
+  mapclear <buffer>
   imapclear <buffer>
   unlet! b:did_ftplugin
   let g:vimwiki_key_mappings = {}
@@ -12,6 +12,7 @@ Before (Reset buffer mappings and settings):
 After (Restore default settings):
   unlet! g:vimwiki_key_mappings g:vimwiki_table_mappings g:vimwiki_use_mouse
   call ReloadVimwiki()
+  set filetype=vimwiki
 
 Execute (Removed commands are unavailable and their replacements exist):
   set filetype=vimwiki
