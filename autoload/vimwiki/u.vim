@@ -228,6 +228,11 @@ function! vimwiki#u#ft_set() abort
   for ftypeadd in ftypelist
     let ftype = ftype . '.' . ftypeadd
   endfor
+  " Vim's MediaWiki ftplugin can leave a numeric undo command. Executing it
+  " aborts the filetype switch with E749 before Vimwiki's commands are loaded.
+  if exists('b:undo_ftplugin') && type(b:undo_ftplugin) != v:t_string
+    let b:undo_ftplugin = ''
+  endif
   let &filetype = ftype
 endfunction
 
@@ -370,7 +375,7 @@ endfunction
 
 
 function! vimwiki#u#hi_typeface(dic) abort
-  " Highight typeface: see $VIMRUNTIME/syntax/html.vim
+  " Highlight typeface: see $VIMRUNTIME/syntax/html.vim
   " -- Basically allow nesting with multiple definition contained
   " :param: dic <dic:list:list> must contain: bold, italic and underline, even if underline is often void,
   " -- see here for underline not defined: https://stackoverflow.com/questions/3003476

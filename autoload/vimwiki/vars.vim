@@ -28,6 +28,13 @@ let s:margin_set_by_user = 0
 
 
 function! vimwiki#vars#init() abort
+  " Invalidate buffer indices before rebuilding the wiki list.
+  for buffer in getbufinfo()
+    if has_key(buffer.variables, 'vimwiki_wiki_nr')
+      unlet buffer.variables.vimwiki_wiki_nr
+    endif
+  endfor
+
   " Init global and local variables
   " Init && Populate: global variable container
   let g:vimwiki_global_vars = {}
@@ -202,7 +209,7 @@ endfunction
 
 
 function! s:internal_global_settings() abort
-  " Declare: normalized settings -> more usefull variables to use internally
+  " Declare: normalized settings -> more useful variables to use internally
   " non-configurable global variables:
 
   " Scheme regexes must be defined even if syntax file is not loaded yet cause users should be

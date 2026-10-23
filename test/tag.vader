@@ -257,7 +257,7 @@ Expect (Correctly formatted tags file):
   !_TAG_PROGRAM_AUTHOR	Vimwiki
   !_TAG_PROGRAM_NAME	Vimwiki Tags
   !_TAG_PROGRAM_URL	https://github.com/vimwiki/vimwiki
-  !_TAG_PROGRAM_VERSION	2026.10.24_1
+  !_TAG_PROGRAM_VERSION	2026.10.24_2
   second-tag	Test-Tag.md	13;"	vimwiki:Test-Tag\tTest-Tag#second-tag\tTest-Tag#second-tag
   test-tag	Test-Tag.md	5;"	vimwiki:Test-Tag\tTest-Tag#a-header\tA header
   top-tag	Test-Tag.md	1;"	vimwiki:Test-Tag\tTest-Tag\tTest-Tag
@@ -571,18 +571,9 @@ Do (Md: #1034: Create File with tag in code for issue #1034):
   :VimwikiRebuildTags!\<CR>
 
 
-Do (Md: #1034: Append something at mono tag):
-  :edit $HOME/testmarkdown/Test-Tag-issue-1034.md\<CR>
-  ggdG
-  :read $HOME/testmarkdown/.vimwiki_tags\<CR>
-  G
-  :g/^!/d\<CR>
-  oContent\<Esc>
-
-
-Expect (Md: #1034: Can see tag2 but not tag1 as in code):
-  tag2	Test-Tag-issue-1034.md	5;"	vimwiki:Test-Tag-issue-1034\tTest-Tag-issue-1034#tag2\tTest-Tag-issue-1034#tag2
-  Content
+Execute (Md: #1034: Can see tag2 but not tag1 as in code):
+  let tags = filter(readfile($HOME . '/testmarkdown/.vimwiki_tags'), 'v:val !~# "^!"')
+  AssertEqual ["tag2\tTest-Tag-issue-1034.md\t5;\"\tvimwiki:Test-Tag-issue-1034\\tTest-Tag-issue-1034#tag2\\tTest-Tag-issue-1034#tag2"], tags
 
 
 Do (Wiki: #1034: Create File with tag in code for issue #1034):
@@ -603,18 +594,9 @@ Do (Wiki: #1034: Create File with tag in code for issue #1034):
   :VimwikiRebuildTags!\<CR>
 
 
-Do (Wiki: #1034: Append something at mono tag):
-  :edit $HOME/testwiki/Test-Tag-issue-1034.wiki\<CR>
-  ggdG
-  :read $HOME/testwiki/.vimwiki_tags\<CR>
-  G
-  :g/^!/d\<CR>
-  oContent\<Esc>
-
-
-Expect (Wiki: #1034: Can see tag2 but not tag1 as in code):
-  tag2	Test-Tag-issue-1034.wiki	5;"	vimwiki:Test-Tag-issue-1034\tTest-Tag-issue-1034#tag2\tTest-Tag-issue-1034#tag2
-  Content
+Execute (Wiki: #1034: Can see tag2 but not tag1 as in code):
+  let tags = filter(readfile($HOME . '/testwiki/.vimwiki_tags'), 'v:val !~# "^!"')
+  AssertEqual ["tag2\tTest-Tag-issue-1034.wiki\t5;\"\tvimwiki:Test-Tag-issue-1034\\tTest-Tag-issue-1034#tag2\\tTest-Tag-issue-1034#tag2"], tags
 
 
 Execute (#1034: Clean file for tag #1034):

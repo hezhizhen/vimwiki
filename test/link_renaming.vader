@@ -26,7 +26,7 @@ Do(Link with / are relative to root #617):
   :VimwikiRenameFile new_name\<Cr>
   :AssertEqual 'new_name', expand('%:t:r')\<Cr>
   :edit $HOME/testmarkdown/test.md\<Cr>
-  :AssertEqual '[dir1 old_name](/dir1/new_name)', getline(1)\<Cr>
+  :AssertEqual '[/dir1/old_name](/dir1/new_name)', getline(1)\<Cr>
 
 
 # TEST TRANSDIRECTORY AND ARGUMENT {{{1
@@ -86,7 +86,7 @@ Do (Testing transforward {{{2):
 # See what happend in root
   :call WriteMe()\<Cr>
   :edit $HOME/testmarkdown/Test-Rename-Completion.md\<Cr>
-  :AssertEqual getline(1), '[dir1 dir11 Test Rename](dir1/Test-Rename-2.md)'\<Cr>
+  :AssertEqual getline(1), '[dir1/dir11/Test-Rename.md](dir1/Test-Rename-2.md)'\<Cr>
 
   :Log 'Backward dir1/dir11 -> root {{{3'\<Cr>
 # See what happend in dir1/dir11
@@ -145,7 +145,7 @@ Do (Create in_root):
   j\<CR>
   j\<CR>
   ggj0y$
-  :AssertEqual '[in_root](in_root.md)', @"\<CR>
+  :AssertEqual '[in_root.md](in_root.md)', @"\<CR>
   0\<CR>
   :AssertEqual $HOME . '/testmarkdown/in_root.md', expand('%')\<CR>
 
@@ -236,10 +236,10 @@ Execute (edit Test-Rename.md):
 
 Expect (Link to in_dir11_new):
   # Test Rename
-  [in_root](in_root.md)
-  [dir1 dir11 in_dir11](dir1/dir11/in_dir11_new.md)
-  [dir1 dir12 in_dir12](dir1/dir12/in_dir12.md)
-  [dir2 in_dir2](dir2/in_dir2.md)
+  [in_root.md](in_root.md)
+  [dir1/dir11/in_dir11.md](dir1/dir11/in_dir11_new.md)
+  [dir1/dir12/in_dir12.md](dir1/dir12/in_dir12.md)
+  [dir2/in_dir2.md](dir2/in_dir2.md)
 
 
 Do (in_dir2 -> in_dir2_new):
@@ -270,10 +270,10 @@ Execute (edit Test-Rename.md):
 
 Expect (Link to in_dir11_new):
   # Test Rename
-  [in_root](in_root.md)
-  [dir1 dir11 in_dir11](dir1/dir11/in_dir11_new.md)
-  [dir1 dir12 in_dir12](dir1/dir12/in_dir12.md)
-  [dir2 in_dir2](dir2/in_dir2_new.md)
+  [in_root.md](in_root.md)
+  [dir1/dir11/in_dir11.md](dir1/dir11/in_dir11_new.md)
+  [dir1/dir12/in_dir12.md](dir1/dir12/in_dir12.md)
+  [dir2/in_dir2.md](dir2/in_dir2_new.md)
 
 
 Execute (edit in_dir11.md):

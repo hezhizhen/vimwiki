@@ -1,5 +1,41 @@
 # Travel thought files
 
+Execute (Open an empty wiki after the editor's filetype detection):
+  edit $HOME/testwiki/filetype_detection.wiki
+  AssertEqual 'vimwiki', &filetype
+  AssertEqual 2, exists(':Vimwiki2HTML')
+  AssertEqual 2, exists(':VimwikiRebuildTags')
+  call DeleteFile('%')
+
+Execute (Load wiki commands after an invalid filetype undo command):
+  enew
+  let b:undo_ftplugin = 0
+  call vimwiki#u#ft_set()
+  AssertEqual 2, exists(':Vimwiki2HTML')
+
+Execute (Run valid filetype cleanup when switching to Vimwiki):
+  let g:vimwiki_test_undo = 0
+  let b:undo_ftplugin = 'let g:vimwiki_test_undo = 1'
+  call vimwiki#u#ft_set()
+  AssertEqual 1, g:vimwiki_test_undo
+  AssertEqual 2, exists(':Vimwiki2HTML')
+  unlet g:vimwiki_test_undo
+
+Execute (Detect a wiki extension after renaming an unnamed buffer):
+  enew
+  file filetype_renamed.md
+  AssertEqual 'vimwiki', &filetype
+  AssertEqual 2, exists(':VimwikiRebuildTags')
+  bwipeout!
+
+Execute (Reinitialize the wiki list while a temporary wiki buffer stays open):
+  edit /tmp/vimwiki_cached_index.md
+  Assert vimwiki#vars#get_bufferlocal('wiki_nr') >= 4
+  call vimwiki#vars#init()
+  AssertEqual -1, vimwiki#vars#get_bufferlocal('wiki_nr')
+  AssertEqual 'default', vimwiki#vars#get_wikilocal('syntax')
+  bwipeout!
+
 Given (Void for Accessing other files within vimwiki #979 {{{1):
 
 
