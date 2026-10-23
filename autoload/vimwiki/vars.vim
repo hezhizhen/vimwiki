@@ -181,12 +181,10 @@ function! s:get_default_global() abort
         \ 'schemes_any': {'type': type([]), 'default': ['mailto', 'matrix', 'news', 'xmpp', 'sip', 'sips', 'doi', 'urn', 'tel', 'data']},
         \ 'table_auto_fmt': {'type': type(0), 'default': 1, 'min': 0, 'max': 1},
         \ 'table_reduce_last_col': {'type': type(0), 'default': 0, 'min': 0, 'max': 1},
-        \ 'table_mappings': {'type': type(0), 'default': 1, 'min': 0, 'max': 1},
         \ 'tags_header': {'type': type(''), 'default': 'Generated Tags', 'min_length': 1},
         \ 'tags_header_level': {'type': type(0), 'default': 1, 'min': 1, 'max': 5},
         \ 'url_maxsave': {'type': type(0), 'default': 15, 'min': 0},
         \ 'use_calendar': {'type': type(0), 'default': 1, 'min': 0, 'max': 1},
-        \ 'use_mouse': {'type': type(0), 'default': 0, 'min': 0, 'max': 1},
         \ 'user_htmls': {'type': type(''), 'default': ''},
         \ 'valid_html_tags': {'type': type(''), 'default':
         \   'b,i,s,u,sub,sup,kbd,br,hr,div,center,strong,em'},
@@ -428,23 +426,11 @@ function! s:normalize_global_settings() abort
     let g:vimwiki_global_vars.key_mappings.text_objs = 0
     let g:vimwiki_global_vars.key_mappings.table_format = 0
     let g:vimwiki_global_vars.key_mappings.table_mappings = 0
-    let g:vimwiki_global_vars.table_mappings = 0 " kept for backwards compatibility
     let g:vimwiki_global_vars.key_mappings.lists = 0
     let g:vimwiki_global_vars.key_mappings.lists_return = 0
     let g:vimwiki_global_vars.key_mappings.links = 0
     let g:vimwiki_global_vars.key_mappings.html = 0
     let g:vimwiki_global_vars.key_mappings.mouse = 0
-    let g:vimwiki_global_vars.use_mouse = 0 " kept for backwards compatibility
-  endif
-
-  " TODO remove these checks and the table_mappings and use_mouse variables
-  " backwards compatibility checks
-  " if the old option isn't its default value then overwrite the new option
-  if g:vimwiki_global_vars.table_mappings == 0 && g:vimwiki_global_vars.key_mappings.table_mappings == 0
-    let g:vimwiki_global_vars.key_mappings.table_mappings = 0
-  endif
-  if g:vimwiki_global_vars.use_mouse == 1 && g:vimwiki_global_vars.key_mappings.mouse == 0
-    let g:vimwiki_global_vars.key_mappings.mouse = 1
   endif
 endfunction
 
