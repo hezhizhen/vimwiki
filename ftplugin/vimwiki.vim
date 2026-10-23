@@ -168,9 +168,7 @@ setlocal formatoptions+=l
 setlocal formatoptions+=n
 let &formatlistpat = vimwiki#vars#get_wikilocal('rxListItem')
 " Used to join 'commented' lines (blockquote, list) (see: #915)
-if v:version > 703
-  setlocal formatoptions+=j
-endif
+setlocal formatoptions+=j
 
 " Set commentstring %%%s
 let &l:commentstring = vimwiki#vars#get_wikilocal('commentstring')
@@ -359,7 +357,7 @@ command! -buffer VimwikiRemoveCBInList call vimwiki#lst#remove_cb_in_list()
 command! -buffer VimwikiRenumberList call vimwiki#lst#adjust_numbered_list()
 command! -buffer VimwikiRenumberAllLists call vimwiki#lst#adjust_whole_buffer()
 command! -buffer VimwikiListToggle call vimwiki#lst#toggle_list_item()
-command! -buffer -range VimwikiRemoveDone call vimwiki#lst#remove_done(1, "<range>", <line1>, <line2>)
+command! -buffer -range VimwikiRemoveDone call vimwiki#lst#remove_done(1, <range>, <line1>, <line2>)
 
 " table commands
 command! -buffer -nargs=* VimwikiTable call vimwiki#tbl#create(<f-args>)
@@ -569,12 +567,8 @@ if str2nr(vimwiki#vars#get_global('key_mappings').lists)
     " Handle case of existing VimwikiReturn mappings outside the <Plug> definition
     " Note: Avoid interfering with popup/completion menu if it's active (#813)
     if maparg('<CR>', 'i') !~# '.*VimwikiReturn*.'
-      if has('patch-7.3.489')
-        " expand iabbrev on enter
-        inoremap <expr><silent><buffer> <CR> pumvisible() ? '<CR>' : '<C-]><Esc>:VimwikiReturn 1 5<CR>'
-      else
-        inoremap <expr><silent><buffer> <CR> pumvisible() ? '<CR>' : '<Esc>:VimwikiReturn 1 5<CR>'
-      endif
+      " expand iabbrev on enter
+      inoremap <expr><silent><buffer> <CR> pumvisible() ? '<CR>' : '<C-]><Esc>:VimwikiReturn 1 5<CR>'
     endif
     if  maparg('<S-CR>', 'i') !~# '.*VimwikiReturn*.'
       inoremap <expr><silent><buffer> <S-CR> pumvisible() ? '<CR>' : '<Esc>:VimwikiReturn 2 2<CR>'

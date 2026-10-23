@@ -2,7 +2,7 @@
 # -- TODO copy-paste issue description
 #
 # Syntax: https://github.com/junegunn/vader.vim#syntax-of-vader-file
-# Run: bash run_tests.sh -v -t vader -n vim_7.3.429 -f issue_example.vader
+# Run: bash run_tests.sh -v -t vader -n vim -f issue_example.vader
 
 Given vimwiki (Input file):
   test

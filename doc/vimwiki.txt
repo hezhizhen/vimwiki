@@ -107,6 +107,10 @@ documents to help you organize your notes, documentation, and tasks.
 
 This fork targets macOS and Linux. Windows support has been removed.
 
+Only the latest stable releases of Vim and Neovim are supported. The current
+requirements are Vim 9.2+ or Neovim 0.12.6+. Older editors are rejected at startup.
+CI follows the latest Vim patch release and the latest stable Neovim release.
+
 Make sure you have these settings in your vimrc file: >
     set nocompatible
     filetype plugin on
@@ -853,7 +857,7 @@ Vimwiki file.
     If you want to remove only items of the current nesting level, (re)define
     a command that calls the same function with `0` as first argument: >
         :command! -buffer -range VimwikiRemoveDone call
-           \ vimwiki#lst#remove_done(0, "<range>", <line1>, <line2>)
+           \ vimwiki#lst#remove_done(0, <range>, <line1>, <line2>)
 <
 *:VimwikiNextTask*
     Jump to the next unfinished task in the current wiki page.
@@ -1768,8 +1772,7 @@ the command `VimwikiReturn` doesn't exist when editing non Vimwiki files.: >
   autocmd FileType vimwiki inoremap <silent><buffer> <S-CR>
               \ <Esc>:VimwikiReturn 2 2<CR>
 
-Note: Prefixing the mapping with `<C-]>` expands iabbrev definitions and
-requires Vim > 7.3.489.
+Note: Prefixing the mapping with `<C-]>` expands iabbrev definitions.
 
 The first argument of the command :VimwikiReturn is a number that specifies
 when to insert a new bullet/number and when not, depending on whether the
@@ -3326,22 +3329,6 @@ Default: 0
 
 
 ------------------------------------------------------------------------------
-*g:vimwiki_CJK_length*
-
-Use a special method to calculate the correct length of the strings with
-double-wide characters (to align table cells properly).
-
-Value           Description~
-0               Do not use it.
-1               Use it.
-
-Default: 0
-
-Note: Vim 7.3 has a new function |strdisplaywidth()|, so for users of an up to
-date Vim, this option is obsolete.
-
-
-------------------------------------------------------------------------------
 *g:vimwiki_dir_link*
 
 This option is about what to do with links to directories, like
@@ -3449,8 +3436,8 @@ they would not be deleted after |:VimwikiAll2HTML|.
 ------------------------------------------------------------------------------
 *g:vimwiki_conceallevel*
 
-In Vim 7.3 'conceallevel' is local to the current window, thus if you open a
-Vimwiki buffer in a new tab or window, it would be set to the default value.
+'conceallevel' is local to the current window, thus if you open a Vimwiki
+buffer in a new tab or window, it would be set to the default value.
 
 Vimwiki sets 'conceallevel' to g:vimwiki_conceallevel every time a Vimwiki
 buffer is entered.
@@ -3523,7 +3510,6 @@ It could be less: in case one of the characters /,#,? is found near the end,
 the URL will be concealed up to the last occurrence of that character.
 
 Note:
-  * The conceal feature works only with Vim >= 7.3.
   * When using the default |wrap| option of Vim, the effect of concealed links
     is not always pleasing, because the visible text on longer lines with
     a lot of concealed parts may appear to be strangely broken across several
@@ -4022,6 +4008,15 @@ are accepted, they will merge directly to dev, which is now the main branch.
 master is retained as a legacy mirror of the dev branch.
 
 This is somewhat experimental, and will probably be refined over time.
+
+
+2026.10.24~
+
+Removed:~
+    * Support for older Vim and Neovim releases. This fork now requires the
+      latest stable editors (currently Vim 9.2+ or Neovim 0.12.6+), and CI tests
+      only current releases. The obsolete g:vimwiki_CJK_length option and
+      fallbacks for missing editor functions and features have been removed.
 
 
 2026.10.23~

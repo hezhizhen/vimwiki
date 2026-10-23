@@ -1,6 +1,5 @@
 " TODO treat if local (see $HOME in all tests)
 " TODO mutualise (to prettify output) mode(1) to check if in -Es or not
-" TODO test tabnext in at least one travis job (without -Es)
 
 " Declare tipical Vim preambule
   " vint: -ProhibitSetNoCompatible
@@ -179,7 +178,6 @@
     nmapclear
 
     " UNlet what can be
-    " -- Note: getcompletion not present on vim7.3
     for i in ['g:vimwiki_commentstring',
           \ 'b:did_ftplugin',
           \ 'g:loaded_vimwiki',
@@ -370,23 +368,7 @@
     " Arg2: column
     let line = a:0 >= 1 ? a:1 : '.'
     let col = a:0 >= 2 ? a:2 : '.'
-    if !exists('*synstack')
-      return []
-    endif
-    let res = map(synstack(line, col), 'synIDattr(v:val, "name")')
-
-    " For old vim version returning 0
-    if type(res) == type(0) && res == 0
-      return []
-    endif
-
-    return res
-  endfunction
-
-  function! AssertIfVersion(version, one, two)
-    " Run Assert only if vim version is high enough
-    if v:version < a:version | return | endif
-    AssertEqual a:one, a:two
+    return map(synstack(line, col), 'synIDattr(v:val, "name")')
   endfunction
 
   function! GetHighlightTerm(group, term)
@@ -395,14 +377,6 @@
     " From: https://vi.stackexchange.com/a/12294/5026
     " Return list ['bold','underline']
     "
-    " Warning: must only be called if has("patch-7.4-2008")
-    " Or rather:  If execute() exists - it's not available for all 7.4
-    " versions.
-    " https://github.com/vim/vim/commit/79815f1ec77406f2f21a618c053e5793b597db7a
-
-    " Clause: Dot not work if not able
-    if v:version < 800 && has('patch-7.4-2008') != 1 | return [] | endif
-
     " Store output of group to variable
     let out = execute('hi ' . a:group)
 

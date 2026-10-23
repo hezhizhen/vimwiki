@@ -80,10 +80,10 @@ The result should look something like:
 
 This fork targets macOS and Linux. Windows support has been removed.
 
-VimWiki has been tested on **Vim >= 7.3**. It may work on older versions but
-will not be officially supported.  It is known to work on NeoVim, although
-it is likely to have
-[NeoVim-specific bugs](https://github.com/vimwiki/vimwiki/labels/neovim).
+Only the latest stable releases of Vim and Neovim are supported. The current
+requirements are **Vim 9.2+** or **Neovim 0.12.6+**. Compatibility code and tests
+for older editors have been removed. CI follows the latest Vim patch release
+and the latest stable Neovim release.
 
 ### Prerequisites
 
@@ -97,7 +97,7 @@ syntax on
 
 Without them, VimWiki will not work properly.
 
-#### Installation using [Vim packages](http://vimhelp.appspot.com/repeat.txt.html#packages) (since Vim 7.4.1528)
+#### Installation using [Vim packages](http://vimhelp.appspot.com/repeat.txt.html#packages)
 
 ```sh
 

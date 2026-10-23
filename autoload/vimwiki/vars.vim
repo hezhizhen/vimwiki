@@ -130,7 +130,6 @@ function! s:get_default_global() abort
   " Get default wikilocal values
   " Please: keep alphabetical sort
   return {
-        \ 'CJK_length': {'type': type(0), 'default': 0, 'min': 0, 'max': 1},
         \ 'auto_chdir': {'type': type(0), 'default': 0, 'min': 0, 'max': 1},
         \ 'auto_header': {'type': type(0), 'default': 0, 'min': 0, 'max': 1},
         \ 'autowriteall': {'type': type(0), 'default': 1, 'min': 0, 'max': 1},
@@ -327,8 +326,6 @@ function! s:extend_global(output_dic, default_dic) abort
       call s:check_users_value(key, user_value, value_infos, 1)
 
       call s:update_key(a:output_dic, key, value_infos.default, user_value)
-      " Remove user_value to prevent type mismatch (E706) errors in vim <7.4.1546
-      unlet user_value
     else
       let a:output_dic[key] = value_infos.default
     endif
@@ -1371,7 +1368,7 @@ function! s:get_anywhere(key, ...) abort
   endif
 
   function! s:any_bufferlocal(key, value) abort
-    if !(v:version > 703 && exists('b:vimwiki_'.a:key)) | return | endif
+    if !exists('b:vimwiki_'.a:key) | return | endif
     exe 'let b:vimwiki_' . a:key . ' = ' . a:1
   endfunction
 
@@ -1442,11 +1439,11 @@ function! s:get_anywhere(key, ...) abort
     return [g:vimwiki_syntaxlocal_vars[s:syntax][a:key], 'syntaxlocal']
 
   " -- Buffer Local
-  elseif v:version > 703 && exists('b:vimwiki_'.a:key)
+  elseif exists('b:vimwiki_'.a:key)
     if a:0
       call s:any_bufferlocal(a:key, value)
     endif
-    return [get(getbufvar('%', ''), 'vimwiki_'.a:key, '/\/\'), 'bufferlocal']
+    return [getbufvar('%', 'vimwiki_'.a:key, '/\/\'), 'bufferlocal']
   else
     return ['', 'none']
   endif
@@ -1638,8 +1635,7 @@ function! vimwiki#vars#get_bufferlocal(key, ...) abort
   " Populate the variable, if it doesn't exist.
   let buffer = a:0 ? a:1 : '%'
 
-  " 'get(getbufvar(...' handles vim < v7.3.831 that didn't allow a default value for getbufvar
-  let value = get(getbufvar(buffer, ''), 'vimwiki_'.a:key, '/\/\')
+  let value = getbufvar(buffer, 'vimwiki_'.a:key, '/\/\')
   if type(value) != 1 || value !=# '/\/\'
     return value
   elseif a:key ==# 'wiki_nr'
@@ -1727,8 +1723,6 @@ function! vimwiki#vars#add_temporary_wiki(settings) abort
   let new_temp_wiki_settings = copy(g:vimwiki_wikilocal_vars[-1])
   for [key, value] in items(a:settings)
     let new_temp_wiki_settings[key] = value
-    " Remove users_value to prevent type mismatch (E706) errors in vim <7.4.1546  (Issue #681)
-    unlet value
   endfor
   call insert(g:vimwiki_wikilocal_vars, new_temp_wiki_settings, -1)
   call s:normalize_wikilocal_settings()

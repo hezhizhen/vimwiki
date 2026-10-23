@@ -381,7 +381,6 @@ function! vimwiki#tags#generate_tags(create, ...) abort
           endif
         endif
       endfor
-      unlet entry " needed for older vims with sticky type checking since name is reused
     endfor
 
     let tagnames = need_all_tags ? sort(keys(tags_entries)) : self.specific_tags

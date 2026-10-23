@@ -4,9 +4,7 @@
 
 
 " Quit if syntax file is already loaded
-if v:version < 600
-  syntax clear
-elseif exists('b:current_syntax')
+if exists('b:current_syntax')
   finish
 endif
 
@@ -454,11 +452,7 @@ hi def link VimwikiTag Keyword
 
 " Deleted called strikethrough
 " See $VIMRUTIME/syntax/html.vim
-if v:version > 800 || (v:version == 800 && has('patch1038')) || has('nvim-0.4.3')
-  hi def VimwikiDelText term=strikethrough cterm=strikethrough gui=strikethrough
-else
-  hi def link VimwikiDelText Constant
-endif
+hi def VimwikiDelText term=strikethrough cterm=strikethrough gui=strikethrough
 hi def link VimwikiDelTextT VimwikiDelText
 
 hi def link VimwikiSuperScript Number

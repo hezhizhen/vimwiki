@@ -1,6 +1,24 @@
 # Table autoformating
 # Very configurable: read doc/design_notes.md
 
+Given vimwiki (Table with wide characters):
+  | 名称 | Value |
+  | - | - |
+  | 笔记 | 1 |
+  | a | 22 |
+
+Execute (Use the default wiki syntax):
+  call SetSyntax('default')
+
+Do (Format a table containing Chinese text):
+  gqq
+
+Expect (Columns align by display width):
+  | 名称 | Value |
+  | -    | -     |
+  | 笔记 | 1     |
+  | a    | 22    |
+
 # Do not consider \| {{{1
 ##########################
 

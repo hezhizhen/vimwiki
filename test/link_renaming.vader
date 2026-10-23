@@ -163,7 +163,6 @@ Do (Create in_root):
 
 
 
-# TODO this does break for old Vim for the buffer local prev_links list is deleted => Cannot change file
 
 
 #  :Log 'One backspace for fun'\<CR>

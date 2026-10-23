@@ -1,85 +1,68 @@
 # Vimwiki Tests
 
-This directory contains a test framework used to automatically test/verify
-Vimwiki functionality. It is based on the following tools:
+The test suite uses [Vader](https://github.com/junegunn/vader.vim) for behavior
+checks and [Vint](https://github.com/Kuniwak/vint) for Vimscript linting.
+Only the latest stable Vim and Neovim releases are supported, currently Vim 9.2
+and Neovim 0.12.6. Old editor matrices and version-dependent test skips have
+been removed.
 
-- [vim-testbed GitHub](https://github.com/tweekmonster/vim-testbed) or on [testbed/vim dockerhub](https://hub.docker.com/r/testbed/vim)
-- [Vader](https://github.com/junegunn/vader.vim)
-- [Vint](https://github.com/Kuniwak/vint)
+## Building the Docker image
 
-
-## Resources
-
-- [Vim patches](http://ftp.vim.org/pub/vim/patches/)
-- Example test cases:
-    - [vim-easy-align](https://github.com/junegunn/vim-easy-align/tree/master/test)
-    - [vim-plug](https://github.com/junegunn/vim-plug/tree/master/test)
-    - [ale](https://github.com/w0rp/ale/tree/master/test)
-    - [Other projects](https://github.com/junegunn/vader.vim/wiki/Projects-using-Vader)
-
-
-## Building Docker Image
-
-To build the Docker image run `docker build -t vimwiki .` from the Vimwiki
-repository root (same location as the Dockerfile).
-
-
-## Running Tests
-
-### Manual Steps
-
-Starting in the test directory run this command:
+From the repository root:
 
 ```sh
-docker run -it --rm -v $PWD/../:/testplugin -v $PWD/../test:/home vimwiki vim_7.4.1099 -u test/vimrc -i NONE
+docker build --no-cache -t vimwiki .
 ```
 
-This will open a vim instance in the docker container and then all tests
-can be run with `:Vader test/*` or individual tests can be run.
+The image builds the latest tagged Vim patch release and downloads the latest
+stable Neovim release for Linux x86_64 or arm64. `--no-cache` refreshes moving
+release tags on manual rebuilds. CI resolves the current release tags on every
+run and passes them as build arguments so editor updates invalidate its cache.
 
-**Note:** Substitute `vim_7.4.1099` for any of the vim versions in the Dockerfile.
+## Running tests
 
-### Automated Tests
+From the `test/` directory:
 
-The script in the `test/` directory named `run_test.sh` can be used to
-automatically run all tests for all installed vim versions. The vim/nvim
-versions are parsed from the Dockerfile. This script will also run `Vint` for all
-plugin source files. For more information run `./run_tests.sh -h`.
+```sh
+# Run Vader and Vint with both current editors in Docker.
+bash run_tests.sh
 
+# Run all Vader suites with one editor.
+bash run_tests.sh -t vader -n vim
+bash run_tests.sh -t vader -n nvim
 
-## Writing Tests
+# Run selected suites with both editors.
+bash run_tests.sh -t vader -n 'vim nvim' -f 'list_clean.vader table_autoformat.vader'
 
-You are advice to write tests at the top of the file where you want to include it because some `Execute` can have some side effect making it hard to debug
+# List the available Docker editors.
+bash run_tests.sh -l
+```
 
-### Inside the container
+To use a local editor, select `local`; `VIMWIKI_TEST_EDITOR` selects the executable:
 
-- `$USER` -> `vimtest` : unprivileged => very hard to mess up things
-- `$HOME` -> `/home/vimtest` : but it is readonly !
-- `$PWD` -> `/testplugin` : mapped to vimwiki plugin root directory
+```sh
+bash run_tests.sh -t vader -n local -f list_clean.vader
+VIMWIKI_TEST_EDITOR=nvim bash run_tests.sh -t vader -n local -f list_clean.vader
+```
 
-For more information, read the [base docker image](https://github.com/tweekmonster/vim-testbed)
+Local mode copies the plugin and test resources into a temporary directory.
+The script downloads Vader when preparing a local run.
 
+For an interactive Docker session, run this from the repository root:
 
-## Known Issues
+```sh
+docker run -it --rm -v "$PWD:/source:ro" vimwiki vim -u test/vimrc -i NONE
+```
 
-1. neovim v0.2.x does not work correctly with Vader output from the docker
-   container. No test results are printed and an error message saying
-   `Vim: Error reading input, exiting...`
-    - Probably need to look into this more and determine if the issue is Vader,
-      Neovim, or Docker.
-2. Vader does not play nice with the location list. Tests that use the location
-   list should be placed in `independent_runs/`.
-    - [Vader Issue #199](https://github.com/junegunn/vader.vim/issues/199)
+Replace `vim` with `nvim` to use Neovim. Run `:Vader test/*.vader` inside the
+editor, or name an individual suite.
+Docker also copies the source into the container before running tests.
 
+## Writing tests
 
-## Notable Vim patches
+Place new cases near the top of the relevant suite: earlier cases can change
+editor state. Behavior checks must run on both supported editors without
+skipping assertions based on old Vim versions.
 
-- `v7.3.831` `getbufvar` added a default value
-- `v7.4.236` add ability to check patch with has("patch-7.4.123")
-- `v7.4.279` added the option to for `globpath()` to return a list
-- `v7.4.1546` sticky type checking removed (allow a variables type to change)
-- `v7.4.1989` `filter()` accepts a Funcref
-- `v7.4.2044` lambda support added - see `:h expr-lambda`
-- `v7.4.2120` Added function "closure" argument
-- `v7.4.2137` add `funcref()`
-- `v8.0` async jobs and timers
+Tests using the location list may need to run independently because of
+[Vader issue #199](https://github.com/junegunn/vader.vim/issues/199).

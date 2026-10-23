@@ -117,17 +117,6 @@ function! s:first_char(string) abort
 endfunction
 
 
-if exists('*strdisplaywidth')
-  function! s:string_length(str) abort
-    return strdisplaywidth(a:str)
-  endfunction
-else
-  function! s:string_length(str) abort
-    return strlen(substitute(a:str, '.', 'x', 'g'))
-  endfunction
-endif
-
-
 function! vimwiki#lst#default_symbol() abort
   return vimwiki#vars#get_syntaxlocal('list_markers')[0]
 endfunction
@@ -146,7 +135,7 @@ endfunction
 function! s:text_begin(lnum) abort
   " Returns: the column where the text of a line starts (possible list item
   " markers and checkboxes are skipped)
-  return s:string_length(matchstr(getline(a:lnum), vimwiki#vars#get_wikilocal('rxListItem')))
+  return strdisplaywidth(matchstr(getline(a:lnum), vimwiki#vars#get_wikilocal('rxListItem')))
 endfunction
 
 
@@ -270,7 +259,7 @@ function! s:get_level(lnum) abort
   if !vimwiki#vars#get_syntaxlocal('recurring_bullets')
     let level = indent(a:lnum)
   else
-    let level = s:string_length(matchstr(getline(a:lnum),
+    let level = strdisplaywidth(matchstr(getline(a:lnum),
           \ vimwiki#vars#get_wikilocal('rx_bullet_chars')))-1
     if level < 0
       let level = (indent(a:lnum) == 0) ? 0 : 9999
@@ -1228,17 +1217,8 @@ endfunction
 
 
 function! vimwiki#lst#remove_done(recursive, range, first_line, last_line) abort
-  " wrapper function to distinguish between function used with a range or not
-  " vim 8.0.1089 and newer and corresponding neovim versions allow to use <range> to distinguish if
-  " the function has been called with a range. For older versions we use remove_done_in_range if
-  " first and last line are identical, which means there was either no range or the range was within
-  " one line.
-  if a:range ==# '<range>'
-    let range = a:first_line != a:last_line
-  else
-    let range = a:range > 0
-  endif
-  if range
+  " An explicit range limits removal to those lines, including a single-line range.
+  if a:range > 0
     call vimwiki#lst#remove_done_in_range(a:first_line, a:last_line)
   else
     call vimwiki#lst#remove_done_in_current_list(a:recursive)
@@ -1265,15 +1245,15 @@ function! s:decrease_level(item, by) abort
   if vimwiki#vars#get_syntaxlocal('recurring_bullets') && a:item.type == 1 &&
         \ index(vimwiki#vars#get_wikilocal('multiple_bullet_chars'),
         \ s:first_char(a:item.mrkr)) > -1
-    if s:string_length(a:item.mrkr) >= 2
+    if strdisplaywidth(a:item.mrkr) >= 2
       call s:substitute_string_in_line(a:item.lnum, s:first_char(a:item.mrkr), '')
     endif
   else
     let old_indent = indent(a:item.lnum)
     if &shiftround
-      let new_indent = (old_indent - 1) / vimwiki#u#sw() * vimwiki#u#sw()
+      let new_indent = (old_indent - 1) / shiftwidth() * shiftwidth()
     else
-      let new_indent = old_indent - vimwiki#u#sw()
+      let new_indent = old_indent - shiftwidth()
     endif
     call s:set_indent(a:item.lnum, a:by * new_indent)
   endif
@@ -1291,9 +1271,9 @@ function! s:increase_level(item, by) abort
   else
     let old_indent = indent(a:item.lnum)
     if &shiftround
-      let new_indent = (old_indent / vimwiki#u#sw() + 1) * vimwiki#u#sw()
+      let new_indent = (old_indent / shiftwidth() + 1) * shiftwidth()
     else
-      let new_indent = old_indent + vimwiki#u#sw()
+      let new_indent = old_indent + shiftwidth()
     endif
     call s:set_indent(a:item.lnum, a:by * new_indent)
   endif
@@ -1509,13 +1489,13 @@ function! vimwiki#lst#change_marker(from_line, to_line, new_mrkr, mode) abort
           if cur_item.type == 1 &&
                 \ index(vimwiki#vars#get_syntaxlocal('multiple_bullet_chars'),
                 \ s:first_char(cur_item.mrkr))>-1
-            let new_mrkr = repeat(new_mrkr, s:string_length(cur_item.mrkr))
+            let new_mrkr = repeat(new_mrkr, strdisplaywidth(cur_item.mrkr))
           else
             "use *** if the parent item has **
             let parent_item = s:get_parent(cur_item)
             if parent_item.type == 1 && s:first_char(parent_item.mrkr) ==# s:first_char(new_mrkr)
               let new_mrkr = repeat(s:first_char(parent_item.mrkr),
-                    \ s:string_length(parent_item.mrkr)+1)
+                    \ strdisplaywidth(parent_item.mrkr)+1)
             endif
           endif
         endif
@@ -1569,7 +1549,7 @@ function! s:adjust_mrkr(item) abort
         \ s:first_char(a:item.mrkr)) > -1
     let parent_item = s:get_parent(a:item)
     if parent_item.type == 1 && s:first_char(parent_item.mrkr) ==# s:first_char(a:item.mrkr)
-      let new_mrkr = repeat(s:first_char(parent_item.mrkr), s:string_length(parent_item.mrkr)+1)
+      let new_mrkr = repeat(s:first_char(parent_item.mrkr), strdisplaywidth(parent_item.mrkr)+1)
     endif
   endif
 
@@ -1778,7 +1758,7 @@ function! vimwiki#lst#kbd_cr(normal, just_mrkr) abort
     let cur_col = 0
   else
     let cur_col = col('$') - col("'^")
-    if getline('.')[col("'^")-1] =~# '\s' && exists('*strdisplaywidth')
+    if getline('.')[col("'^")-1] =~# '\s'
       let ws_behind_cursor =
             \ strdisplaywidth(matchstr(getline('.')[col("'^")-1:], '\s\+'),
             \ virtcol("'^")-1)

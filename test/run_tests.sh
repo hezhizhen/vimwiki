@@ -8,7 +8,7 @@ Credit: https://github.com/w0rp/ale for script ideas and the color vader output 
 '
 
 # Capture start time now
-declare -g start_time=$(date +%s)
+start_time=$(date +%s)
 
 
 printHelp() {
@@ -20,14 +20,13 @@ printHelp() {
 
     -h (Help) Print help message
 
-    -n (versioN) Specify vim/nvim version to run tests for.
-       Specify "local" to run on your current vim install.
-       Multiple versions can be specified by quoting the value and
-       separating versions with a space. E.g. -n "vim1 vim2".
-       Default is all available versions.
+    -n (versioN) Select "vim" or "nvim" from the current-release Docker image.
+       Specify "local" to use your current editor (VIMWIKI_TEST_EDITOR=vim or nvim).
+       Multiple editors can be specified as -n "vim nvim".
+       Default is both current editors.
 
     -f (File) Space separated list of tests to run.
-       E.g. -o "list_* z_success"
+       E.g. -f "list_* z_success"
 
     -l (List) list available versions that can be used with the '-n' option
 
@@ -36,10 +35,10 @@ printHelp() {
     -v (Verbose) Turn on verbose output.
 
     E.g. On Linux without with local Vim
-    bash run_tests.sh -v -t vader -n local -f link_creation.vader issue_markdown.vader
+    bash run_tests.sh -v -t vader -n local -f "link_creation.vader issue_markdown.vader"
 
     E.g. On Linux
-    bash run_tests.sh -v -t vader -n "vim_7.4.1099 vim_8.1.0519" -f link_creation.vader issue_markdown.vader
+    bash run_tests.sh -v -t vader -n "vim nvim" -f "link_creation.vader issue_markdown.vader"
 
     EOF
 
@@ -74,30 +73,30 @@ run_test(){
 parse_argument(){
   : 'Parse user argument'
   # Declare color helper
-  declare -g red='\033[0;31m'
-  declare -g green='\033[0;32m'
-  declare -g nc='\033[0m'
+  red='\033[0;31m'
+  green='\033[0;32m'
+  nc='\033[0m'
 
   # Declare: Path of the script, supposing no spaces
-  declare -g g_script_file=$(dirname "$0")
-  declare -g g_script_path=$(realpath "$g_script_file")
-  declare -g g_wiki_path=$(realpath "$g_script_path/..")
-  declare -g g_tmp_dir=$(dirname "$(mktemp -u)")
+  g_script_file=$(dirname "$0")
+  g_script_path=$(realpath "$g_script_file")
+  g_wiki_path=$(realpath "$g_script_path/..")
+  g_tmp_dir=$(dirname "$(mktemp -u)")
   
   # Declare: list of vim/nvim versions
-  declare -g g_vers="$(print_versions)"
+  g_vers="$(print_versions)"
   
   # Declare: type of tests to run - vader/vint/all
-  declare -g g_type="all"
+  g_type="all"
   
   # Declare: verbose output flag
-  declare -g g_verbose=0
+  g_verbose=0
   
   # Declare: only run these tests
-  declare -g g_file_test=""
+  g_file_test=""
   
   # Declare: docker flags
-  declare -g flags=(--rm -v "$PWD/../:/testplugin" -v "$PWD/../test:/home" -w /testplugin vimwiki)
+  flags=(--rm -v "$g_wiki_path:/source:ro" -w /testplugin vimwiki)
   
   # Parse all argument options
   while getopts ":hvn:lt:f:" opt; do
@@ -178,8 +177,7 @@ execute_test_argument(){
 
 print_versions() {
   : 'Print the names of all vim/nvim versions'
-  # Get all possible version <- Dockerfile
-  sed -n 's/.* -name \([^ ]*\) .*/\1/p' ../Dockerfile
+  printf '%s\n' vim nvim
   exit 0
 }
 
@@ -190,7 +188,6 @@ run_vader() {
   local -i res=0
   local opt='' current_test=''
 
-  echo "Tin 1 $g_file_test"
   # Parse tests files to execute
   if [[ -z "$g_file_test" ]]; then
     opt="test/*"
@@ -211,33 +208,21 @@ run_vader() {
       fi
     done
   fi
-  echo "Tin 2 $opt"
 
   # Run tests for each specified version
   for v in $g_vers; do
     echo -e "\n\nRunning version: $v"
     echo -e "============================="
 
-    # Set local environment variables
+    # Prepare an isolated copy for a local editor.
     if [[ "$v" == "local" ]]; then
-      # Save HOME var
-      home_save="$HOME"
-
-      # Create temporary root
-      mkdir -p "$g_tmp_dir/vader_wiki"
-      mkdir -p "$g_tmp_dir/vader_wiki/home"
-      mkdir -p "$g_tmp_dir/vader_wiki/home/test"
-      mkdir -p "$g_tmp_dir/vader_wiki/testplugin"
-
-      # Set vars
-      export ROOT="$g_tmp_dir/vader_wiki/"
-      export HOME="$g_tmp_dir/vader_wiki/home"
-      vim="vim"
-      vim_opt="-u ~/test/vimrc"
+      local_test_dir=$(mktemp -d "$g_tmp_dir/vimwiki-tests.XXXXXX") || return 1
+      export VIMWIKI_TEST_ROOT="$local_test_dir"
+      export VIMWIKI_TEST_HOME="$local_test_dir/home"
+      vim="${VIMWIKI_TEST_EDITOR:-vim}"
+      vim_opt="-u $local_test_dir/testplugin/test/vimrc"
     else
-      # Only set dockerized vars
-      export ROOT="/"  # So no if in vimrc
-      vim="/vim-build/bin/$v"
+      vim="$v"
       vim_opt="-u test/vimrc"
     fi
 
@@ -248,40 +233,67 @@ run_vader() {
     # IDK why vim with -Es is returning ! and make fail:
     # -- tabnext profiling
     # -- map.vim
-    vim_opt+=' -i NONE -Es '
+    vim_opt+=' -i NONE -n '
+    if [[ "$vim" == *nvim ]]; then
+      vim_opt+=' --headless '
+    else
+      vim_opt+=' -Es '
+    fi
 
     # set -o pipefail
 
     # Copy the resources to temporary directory
     if [[ "$v" == "local" ]]; then
-      # flags=(--rm -v "$PWD/../:/testplugin" -v "$PWD/../test:/home" -w /testplugin vimwiki)
-      echo -e "\nCopying resources to $ROOT"
-      # Copy testplugin
-      cp -rf "$g_wiki_path/"* "$ROOT/testplugin/"
-      # Copy home
-      cp -rf "$g_script_path/"* "$HOME/test/"
-      # Copy rtp.vim
-      cp -rf "$g_script_path/resources/rtp_local.vim" "$ROOT/rtp.vim"
-      # Copy vader <- internet
-      echo 'Cloning Vader (git, do not care the fatal)'
-      git clone --depth 10 https://github.com/junegunn/vader.vim /tmp/vader_wiki/vader 2>&1
+      if ! python3 - "$g_wiki_path" "$local_test_dir" <<'PY'
+from pathlib import Path
+import shutil
+import sys
+
+repo, root = map(Path, sys.argv[1:])
+plugin = root / 'testplugin'
+test_home = root / 'home'
+test_home.mkdir()
+shutil.copytree(repo, plugin, ignore=shutil.ignore_patterns('.git'))
+for path in (plugin / 'test').rglob('*'):
+    if path.is_file() and (path.suffix in ['.vader', '.vim', '.md', '.wiki'] or path.name == 'vimrc'):
+        text = path.read_text()
+        for old, new in [('$HOME', '$VIMWIKI_TEST_HOME'), ('$ROOT', '$VIMWIKI_TEST_ROOT'),
+                         ('/home/vimtest', str(test_home)), ('/testplugin', str(plugin)),
+                         ('~/', str(test_home) + '/')]:
+            text = text.replace(old, new)
+        path.write_text(text)
+(root / 'rtp.vim').write_text('set runtimepath^=' + str(plugin) + '\n')
+PY
+      then
+        return 1
+      fi
+      git clone --no-checkout https://github.com/junegunn/vader.vim "$local_test_dir/vader" \
+        && git -C "$local_test_dir/vader" checkout de8a976f1eae2c2b680604205c3e8b5c8882493c \
+        || return 1
     fi
 
     # Run batch of tests
     # shellcheck disable=SC2086,SC2206
     if [[ "$opt" != "" ]]; then
       if [[ "$v" == "local" ]]; then
-        pushd "$g_tmp_dir/vader_wiki/testplugin" \
+        pushd "$local_test_dir/testplugin" \
           || echo 'Warning pushd testplugin failed'
 
         # Run the tests
         fcmd(){
-          $vim $vim_opt "+Vader! ${opt}" 2>&1 \
-            | vader_filter | vader_color
-          return ${PIPESTATUS[1]}
+          VADER_OUTPUT_FILE="$local_test_dir/vader.log" NVIM_LOG_FILE="$local_test_dir/nvim.log" \
+            $vim $vim_opt "+Vader! ${opt}" > "$local_test_dir/editor.log" 2>&1
+          local editor_status=$?
+          if [[ "$editor_status" -ne 0 ]]; then
+            cat "$local_test_dir/editor.log"
+          fi
+          if [[ ! -f "$local_test_dir/vader.log" ]]; then
+            return 1
+          fi
+          vader_filter < "$local_test_dir/vader.log" | vader_color
+          return "$(( editor_status | PIPESTATUS[0] | PIPESTATUS[1] ))"
         }
         echo -e "\nStarting Batch Vim/Vader:\n<- $opt\n"
-        type fcmd | sed  -n '/^    /{s/^    //p}' | sed '$s/.*/&;/' ; shift ;
         fcmd; ret=$?
         echo -e "\nReturned Batch Vim/Vader -> $ret"
         (( res |= ret ))
@@ -293,10 +305,9 @@ run_vader() {
           docker run -a stderr -e "VADER_OUTPUT_FILE=/dev/stderr" \
             "${flags[@]}" "$v" $vim_opt "+Vader! ${opt}" 2>&1 \
             | vader_filter | vader_color
-          return ${PIPESTATUS[1]}
+          return "$(( PIPESTATUS[0] | PIPESTATUS[1] | PIPESTATUS[2] ))"
         }
         echo -e "\nStarting Batch Vim/Vader with: $opt\n"
-        type fcmd | sed  -n '/^    /{s/^    //p}' | sed '$s/.*/&;/' ; shift ;
         fcmd; ret=$?
         echo -e "\nReturned Batch Docker/Vim/Vader -> $ret : ${PIPESTATUS[*]}"
         (( res |= ret ))
@@ -305,9 +316,8 @@ run_vader() {
 
     #set +o pipefail
 
-    # Restore what must (I know it should be refactored in a while)
     if [[ "$v" == local ]]; then
-      export HOME=$home_save
+      rm -rf "$local_test_dir"
     fi
   done
   return "$res"

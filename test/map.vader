@@ -268,7 +268,6 @@ Expect (Dec header level):
   # Head2
   content 2
 
-# TODO fix for vim_7.3.429  
 # Do ([[ -> Go to the previous header):
 #   G
 #   k
@@ -367,7 +366,7 @@ Expect (Dec header level):
 # # -Es -> Delete trailing *
 #   :let mode = mode(1)\<Cr>
 #   :Log 'Mode : ' .mode\<Cr>
-#   :if mode ==# 'ce' || mode ==# 'cv' || v:version < 704\<Cr>
+#   :if mode ==# 'ce' || mode ==# 'cv'\<Cr>
 #     Log 'Cheating'\<Cr>
 #     try\<Cr>
 #       g/^\* \?$/d\<Cr>

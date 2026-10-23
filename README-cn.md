@@ -111,6 +111,10 @@ normal 模式:
 
 此 fork 面向 macOS 和 Linux，已移除 Windows 支持。
 
+仅支持 Vim 和 Neovim 的最新稳定版，当前要求 **Vim 9.2+** 或
+**Neovim 0.12.6+**。已移除旧版编辑器的兼容代码和测试，CI 跟随 Vim
+最新补丁版和 Neovim 最新稳定版。
+
 确保在 `vimrc` 中加入了以下设置：
 
     set nocompatible
@@ -119,7 +123,7 @@ normal 模式:
 
 没有这些设置，Vimwiki 将无法正常工作。
 
-通过 [Vim packages](http://vimhelp.appspot.com/repeat.txt.html#packages) 安装（Vim 7.4.1528 后）
+通过 [Vim packages](http://vimhelp.appspot.com/repeat.txt.html#packages) 安装
 ------------------------------------------------------------------------------
 
     git clone https://github.com/vimwiki/vimwiki.git ~/.vim/pack/plugins/start/vimwiki
