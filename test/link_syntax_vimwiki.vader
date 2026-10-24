@@ -31,7 +31,7 @@ Do (Check absolute-on-filesystem page link to /tmp/some_page with 2 leading slas
   :VimwikiGoto link_syntax\<CR>
   :3\<CR>
   \<CR>
-  :AssertEqual '/tmp/some_page.wiki', expand('%')\<CR>
+  :AssertEqual resolve('/tmp/some_page.wiki'), expand('%')\<CR>
 
 Do (Check absolute-on-filesystem page link to index using tilde for homedir):
   :VimwikiIndex 1\<CR>
@@ -91,7 +91,7 @@ Do (Nested: Check absolute-on-filesystem page link to /tmp/some_page with 2 lead
   :VimwikiGoto link_syntax/nested\<CR>
   :3\<CR>
   \<CR>
-  :AssertEqual '/tmp/some_page.wiki', expand('%')\<CR>
+  :AssertEqual resolve('/tmp/some_page.wiki'), expand('%')\<CR>
 
 Do (Nested: Check absolute-on-filesystem page link to index using tilde for homedir):
   :VimwikiIndex 1\<CR>

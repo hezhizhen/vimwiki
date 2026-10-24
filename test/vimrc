@@ -1,18 +1,19 @@
-" TODO treat if local (see $HOME in all tests)
 " TODO mutualise (to prettify output) mode(1) to check if in -Es or not
 
 " Declare tipical Vim preambule
   " vint: -ProhibitSetNoCompatible
   set nocompatible
   set encoding=utf-8
+  " Keep subprocesses independent of the user's interactive shell setup.
+  set shell=/bin/sh
   filetype plugin indent on
   syntax enable
 
-" Usefull var: for one day, making tests on local
+" Test paths are replaced with isolated temporary paths by run_tests.sh.
   let $TPLUGIN = '/testplugin'
   let $THOME = $HOME
 
-" Set chrooted virtual runtime path
+" Load the isolated plugin runtime path.
   let rtp = $ROOT . '/rtp.vim'
   if filereadable(rtp)
     execute 'source ' . rtp
@@ -222,7 +223,7 @@
   endfunction
 
   function! CopyResources()
-    " Copy wiki test resources so that vimtest user can write them
+    " Copy writable wiki resources into the isolated test home.
     call system('cp -r /testplugin/test/resources/* $HOME/')
     " Make diary directory
     call system('mkdir $HOME/testwiki/diary')

@@ -135,27 +135,6 @@ function! vimwiki#u#cursor(lnum, cnum) abort
 endfunction
 
 
-function! vimwiki#u#os_name() abort
-  " Returns: OS name, human readable
-  if vimwiki#u#is_macos()
-    return 'Mac'
-  else
-    return 'Linux'
-  endif
-endfunction
-
-
-function! vimwiki#u#is_macos() abort
-  " Check if OS is mac
-  if has('mac') || has('macunix') || has('gui_mac')
-    return 1
-  endif
-  " that still doesn't mean we are not on Mac OS
-  let os = substitute(system('uname'), '\n', '', '')
-  return os ==? 'Darwin' || os ==? 'Mac'
-endfunction
-
-
 function! vimwiki#u#count_first_sym(line) abort
   let first_sym = matchstr(a:line, '\S')
   return len(matchstr(a:line, first_sym.'\+'))

@@ -305,24 +305,8 @@ endfunction
 
 
 function! vimwiki#base#system_open_link(url) abort
-  " Open Link with OS handler (like gx)
-  " handlers
-  function! s:macunix_handler(url) abort
-    call system('open ' . shellescape(a:url).' &')
-  endfunction
-  function! s:linux_handler(url) abort
-    call system('xdg-open ' . shellescape(a:url).' >/dev/null 2>&1 &')
-  endfunction
-  try
-    if vimwiki#u#is_macos()
-      call s:macunix_handler(a:url)
-      return
-    else
-      call s:linux_handler(a:url)
-      return
-    endif
-  endtry
-  call vimwiki#u#error('Default Vimwiki link handler was unable to open the HTML file!')
+  " Open links with the macOS handler (like gx).
+  call system('open ' . shellescape(a:url) . ' &')
 endfunction
 
 

@@ -1,0 +1,23 @@
+Execute (Open a URL as one literal argument to the macOS handler):
+  let saved_path = $PATH
+  let handler_dir = tempname()
+  let handler_log = tempname()
+  call mkdir(handler_dir)
+  call writefile(['#!/bin/sh', 'printf "%s\n" "$#" "$@" > ' . shellescape(handler_log)], handler_dir . '/open')
+  call setfperm(handler_dir . '/open', 'rwx------')
+  let $PATH = handler_dir . ':' . $PATH
+  try
+    let url = "https://example.com/it's a page?x=$value&y=2;fragment#heading"
+    call vimwiki#base#system_open_link(url)
+    for attempt in range(200)
+      if filereadable(handler_log)
+        break
+      endif
+      sleep 10m
+    endfor
+    AssertEqual ['1', url], readfile(handler_log)
+  finally
+    let $PATH = saved_path
+    call delete(handler_dir, 'rf')
+    call delete(handler_log)
+  endtry

@@ -1,4 +1,4 @@
-# Paths on macOS and Linux use / as the directory separator.
+# Paths on macOS use / as the directory separator.
 
 Execute (Normalize and join Unix paths):
   AssertEqual '/wiki/notes', vimwiki#path#chomp_slash('/wiki/notes///')

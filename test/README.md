@@ -6,25 +6,26 @@ Only the latest stable Vim and Neovim releases are supported, currently Vim 9.2
 and Neovim 0.12.6. Old editor matrices and version-dependent test skips have
 been removed.
 
-## Building the Docker image
+## Requirements
 
-From the repository root:
+Run the tests on macOS with current Vim and Neovim executables on your `PATH`,
+plus Git and Python 3. Install Vint in a virtual environment:
 
 ```sh
-docker build --no-cache -t vimwiki .
+python3 -m venv /tmp/vimwiki-vint
+/tmp/vimwiki-vint/bin/pip install 'setuptools<81' vim-vint
+export PATH="/tmp/vimwiki-vint/bin:$PATH"
 ```
 
-The image builds the latest tagged Vim patch release and downloads the latest
-stable Neovim release for Linux x86_64 or arm64. `--no-cache` refreshes moving
-release tags on manual rebuilds. CI resolves the current release tags on every
-run and passes them as build arguments so editor updates invalidate its cache.
+CI runs directly on macOS. It builds the latest tagged Vim patch release and
+downloads the latest stable Neovim release for the runner's architecture.
 
 ## Running tests
 
 From the `test/` directory:
 
 ```sh
-# Run Vader and Vint with both current editors in Docker.
+# Run Vader and Vint with both installed editors.
 bash run_tests.sh
 
 # Run all Vader suites with one editor.
@@ -34,29 +35,21 @@ bash run_tests.sh -t vader -n nvim
 # Run selected suites with both editors.
 bash run_tests.sh -t vader -n 'vim nvim' -f 'list_clean.vader table_autoformat.vader'
 
-# List the available Docker editors.
+# List the default editor names.
 bash run_tests.sh -l
 ```
 
-To use a local editor, select `local`; `VIMWIKI_TEST_EDITOR` selects the executable:
+The runner also accepts an editor executable path. The `local` alias uses
+`VIMWIKI_TEST_EDITOR`, defaulting to `vim`:
 
 ```sh
 bash run_tests.sh -t vader -n local -f list_clean.vader
 VIMWIKI_TEST_EDITOR=nvim bash run_tests.sh -t vader -n local -f list_clean.vader
 ```
 
-Local mode copies the plugin and test resources into a temporary directory.
-The script downloads Vader when preparing a local run.
-
-For an interactive Docker session, run this from the repository root:
-
-```sh
-docker run -it --rm -v "$PWD:/source:ro" vimwiki vim -u test/vimrc -i NONE
-```
-
-Replace `vim` with `nvim` to use Neovim. Run `:Vader test/*.vader` inside the
-editor, or name an individual suite.
-Docker also copies the source into the container before running tests.
+Each editor run copies the plugin and test resources into a temporary directory
+and downloads the pinned Vader revision there. Test writes stay in this copy.
+The script can be invoked from any directory, including the repository root.
 
 ## Writing tests
 

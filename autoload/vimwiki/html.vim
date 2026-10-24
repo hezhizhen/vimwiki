@@ -1875,12 +1875,11 @@ function! s:convert_file(path_html, wikifile) abort
     endif
     call vimwiki#path#mkdir(path_html)
 
-    if g:vimwiki_global_vars['listing_hl'] > 0 && has('unix')
+    if g:vimwiki_global_vars['listing_hl'] > 0
       let i = 0
       while i < len(html_lines)
         if html_lines[i] =~# '^<pre .*type=.\+>'
           let type = split(split(split(html_lines[i], 'type=')[1], '>')[0], '\s\+')[0]
-          let attr = split(split(html_lines[i], '<pre ')[0], '>')[0]
           let start = i + 1
           let cur = start
 
@@ -1888,11 +1887,13 @@ function! s:convert_file(path_html, wikifile) abort
             let cur += 1
           endwhile
 
-          let tmp = ('tmp'. split(system('mktemp -p . --suffix=.' . type, 'silent'), 'tmp')[-1])[:-2]
-          call system('echo ' . shellescape(join(html_lines[start : cur - 1], "\n")) . ' > ' . tmp)
-          call system(g:vimwiki_global_vars['listing_hl_command'] . ' ' . tmp  . ' > ' . tmp . '.html')
-          let html_out = system('cat ' . tmp . '.html')
-          call system('rm ' . tmp . ' ' . tmp . '.html')
+          let tmp = tempname() . '.' . type
+          try
+            call writefile(html_lines[start : cur - 1], tmp)
+            let html_out = system(g:vimwiki_global_vars['listing_hl_command'] . ' ' . shellescape(tmp))
+          finally
+            call delete(tmp)
+          endtry
           let i = cur
           let html_lines = html_lines[0 : start - 1] + split(html_out, "\n") + html_lines[cur : ]
         endif
