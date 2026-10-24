@@ -52,3 +52,19 @@ Expect (Output comes from the external highlighter):
   else:
       render("other")
   </pre>
+
+
+Execute (Ignore stderr warnings from a successful highlighter):
+  let g:vimwiki_global_vars['listing_hl_command'] = 'sh -c '
+        \ . shellescape('printf "%s\n" warning-only-on-stderr >&2; sed "s/print(/render(/g" "$1"')
+        \ . ' sh'
+  call ConvertWiki2Body()
+  g/^\s*$/d
+
+Expect (Only the highlighter stdout is inserted into HTML):
+  <pre type=py>
+  if (a == 2):
+      render("2")
+  else:
+      render("other")
+  </pre>

@@ -1890,9 +1890,13 @@ function! s:convert_file(path_html, wikifile) abort
           let tmp = tempname() . '.' . type
           try
             call writefile(html_lines[start : cur - 1], tmp)
-            let html_out = system(g:vimwiki_global_vars['listing_hl_command'] . ' ' . shellescape(tmp))
+            " Read stdout separately because system() also captures stderr.
+            call system(g:vimwiki_global_vars['listing_hl_command'] . ' ' . shellescape(tmp)
+                  \ . ' > ' . shellescape(tmp . '.html'))
+            let html_out = join(readfile(tmp . '.html'), "\n")
           finally
             call delete(tmp)
+            call delete(tmp . '.html')
           endtry
           let i = cur
           let html_lines = html_lines[0 : start - 1] + split(html_out, "\n") + html_lines[cur : ]
