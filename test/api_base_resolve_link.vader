@@ -16,7 +16,7 @@ Execute (Resolve link for /index - absolute path from wiki root):
 Execute (Resolve link for ///tmp/some_page - absolute path to standalone page):
   VimwikiIndex 1
   let link_infos = vimwiki#base#resolve_link('///tmp/some_page')
-  AssertEqual '/tmp/some_page.wiki', link_infos.filename
+  AssertEqual resolve('/tmp/some_page.wiki'), link_infos.filename
 
 Execute (Resolve link for //~/testwiki/index - page in wiki under homedir):
   VimwikiIndex 1

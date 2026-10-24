@@ -1,7 +1,7 @@
 # Link creation: my favorite (tinmarino)
 # You know, when pressing Enter:
 #   in mode normal, visual
-#   on macOS and Linux
+#   on macOS
 # Seems easy but tests are reaaly needed here
 
 # Links Renaming inside #1138 {{{1
@@ -251,7 +251,7 @@ Do (Check in_home2):
 
 Do (Check in_tmp):
   jj\<Cr>
-  :AssertEqual expand('%'), '/tmp/in_tmp.md'\<Cr>
+  :AssertEqual resolve('/tmp/in_tmp.md'), expand('%')\<Cr>
 
 # Here, assuming that "current wiki" means the working directory, since
 # no wiki is currently defined:
@@ -283,7 +283,7 @@ Do (Check in_home2):
 
 Do (Check in_tmp):
   jj\<Cr>
-  :AssertEqual expand('%'), '/tmp/in_tmp.wiki'\<Cr>
+  :AssertEqual resolve('/tmp/in_tmp.wiki'), expand('%')\<Cr>
 
 # Here, assuming that "current wiki" means the working directory, since
 # no wiki is currently defined:

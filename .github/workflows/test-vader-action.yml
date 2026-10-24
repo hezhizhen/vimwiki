@@ -10,9 +10,9 @@ jobs:
     # Copied from: https://github.com/junegunn/fzf/blob/master/
     # -- .github/workflows/typos.yml
     name: Typos
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: crate-ci/typos@v1.51.1
@@ -24,55 +24,54 @@ jobs:
     # Copied from: https://github.com/junegunn/fzf/blob/master/
     # -- .github/workflows/typos.yml
     name: Yamllint
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: ibiqlik/action-yamllint@v3
-        with:
-          file_or_dir: .github/workflows/test-vader-action.yml
+      - name: Check YAML
+        run: |
+          python3 -m venv "$RUNNER_TEMP/yamllint"
+          "$RUNNER_TEMP/yamllint/bin/pip" install yamllint
+          "$RUNNER_TEMP/yamllint/bin/yamllint" \
+            .github/workflows/test-vader-action.yml
 
 
   Vint:
-    # Copied from: https://github.com/LudvigHz/vint-action
-    # And local ./test/run_test.sh
     name: Vint
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: ludvighz/vint-action@v1
-        with:
-          path: .
-          args: --style-problem
-      - uses: ludvighz/vint-action@v1
-        with:
-          path: test/vimrc
-          args: --style-problem
+      - name: Check Vimscript
+        run: |
+          python3 -m venv "$RUNNER_TEMP/vint"
+          "$RUNNER_TEMP/vint/bin/pip" install 'setuptools<81' vim-vint
+          export PATH="$RUNNER_TEMP/vint/bin:$PATH"
+          bash test/run_tests.sh -t vint
 
 
   Check:
     name: Check latest ${{ matrix.editor }}
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:
         editor: [vim, nvim]
     steps:
       # This action is required to fetch the code to test
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Resolve current editor releases
         id: editors
         run: |
-          vim_version=$(git ls-remote --tags --refs \
+          vim_version=$(git ls-remote --tags --refs --sort=version:refname \
             https://github.com/vim/vim.git 'v[0-9]*' \
             | sed 's,.*refs/tags/,,' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' \
-            | sort -V | tail -n 1)
+            | tail -n 1)
           nvim_version=$(curl -fsSL \
             https://api.github.com/repos/neovim/neovim/releases/latest \
             | python3 -c \
@@ -82,24 +81,35 @@ jobs:
           printf 'vim=%s\nnvim=%s\n' "$vim_version" "$nvim_version" \
             >> "$GITHUB_OUTPUT"
 
-      # Cache the image using the editor tags resolved for this run.
-      - uses: docker/setup-buildx-action@v4
-      - uses: docker/build-push-action@v7
-        with:
-          context: .
-          push: false
-          tags: vimwiki:latest
-          load: true
-          build-args: |
-            VIM_VERSION=${{ steps.editors.outputs.vim }}
-            NVIM_VERSION=${{ steps.editors.outputs.nvim }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      - name: Build current Vim
+        if: matrix.editor == 'vim'
+        env:
+          VIM_VERSION: ${{ steps.editors.outputs.vim }}
+        run: |
+          git clone --depth 1 --branch "$VIM_VERSION" \
+            https://github.com/vim/vim.git "$RUNNER_TEMP/vim-source"
+          cd "$RUNNER_TEMP/vim-source"
+          ./configure --prefix="$RUNNER_TEMP/editor" --with-features=huge \
+            --enable-gui=no --without-x --disable-nls
+          make -j"$(sysctl -n hw.logicalcpu)"
+          make install
+          echo "$RUNNER_TEMP/editor/bin" >> "$GITHUB_PATH"
 
+      - name: Install current Neovim
+        if: matrix.editor == 'nvim'
+        env:
+          NVIM_VERSION: ${{ steps.editors.outputs.nvim }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/editor"
+          url="https://github.com/neovim/neovim/releases/download"
+          curl -fsSL \
+            "$url/$NVIM_VERSION/nvim-macos-$(uname -m).tar.gz" \
+            | tar -xz --strip-components=1 -C "$RUNNER_TEMP/editor"
+          echo "$RUNNER_TEMP/editor/bin" >> "$GITHUB_PATH"
 
       - name: Check
         run: |
-          cd test
-          bash run_tests.sh -v -t vader -n "$EDITOR"
+          "$EDITOR" --version
+          bash test/run_tests.sh -v -t vader -n "$EDITOR"
         env:
           EDITOR: ${{ matrix.editor }}

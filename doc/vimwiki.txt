@@ -105,7 +105,7 @@ documents to help you organize your notes, documentation, and tasks.
 ==============================================================================
 2. Prerequisites                                       *vimwiki-prerequisites*
 
-This fork targets macOS and Linux. Windows support has been removed.
+This fork supports macOS only.
 
 Only the latest stable releases of Vim and Neovim are supported. The current
 requirements are Vim 9.2+ or Neovim 0.12.6+. Older editors are rejected at startup.
@@ -1170,9 +1170,8 @@ resources using absolute or relative paths: >
   [[local:/home/somebody/d/e/f/music.mp3]]
   [[file:/home/user/documents/|Link to a directory]]
 
-These links are opened with the system command, i.e. !xdg-open (Linux) or !open
-(macOS).  To customize this behavior, see
-|VimwikiLinkHandler|.
+These links are opened with the macOS !open command. To customize this behavior,
+see |VimwikiLinkHandler|.
 
 In Vim, "file:" and "local:" behave the same, i.e. you can use them with both
 relative and absolute links. When converted to HTML, however, "file:" links
@@ -4037,6 +4036,8 @@ Removed:~
 2026.10.24~
 
 Removed:~
+    * Linux support, including its link handler and Docker test environment.
+      This fork now supports macOS only, and CI runs directly on macOS.
     * Support for older Vim and Neovim releases. This fork now requires the
       latest stable editors (currently Vim 9.2+ or Neovim 0.12.6+), and CI tests
       only current releases. The obsolete g:vimwiki_CJK_length option and

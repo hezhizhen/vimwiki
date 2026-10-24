@@ -5,6 +5,17 @@
 # Syntax: https://github.com/junegunn/vader.vim#syntax-of-vader-file
 # Run: bash run_tests.sh -v -t vader -n vim -f issue_example.vader
 
+Before (Enable external code highlighting):
+  let g:bck_listing_hl = g:vimwiki_global_vars['listing_hl']
+  let g:bck_command = g:vimwiki_global_vars['listing_hl_command']
+  let g:vimwiki_global_vars['listing_hl'] = 1
+  let g:vimwiki_global_vars['listing_hl_command'] = 'cat'
+
+After (Restore code highlighting):
+  let g:vimwiki_global_vars['listing_hl'] = g:bck_listing_hl
+  let g:vimwiki_global_vars['listing_hl_command'] = g:bck_command
+  unlet g:bck_listing_hl g:bck_command
+
 Given vimwiki (Input file with python code):
   {{{type=py
   if (a == 2):
@@ -15,9 +26,6 @@ Given vimwiki (Input file with python code):
 
 Execute (Convert to HTML):
   Log "HTML path: " . vimwiki#vars#get_wikilocal('path_html')
-
-  let g:bck_command = g:vimwiki_global_vars['listing_hl_command']
-  let g:vimwiki_global_vars['listing_hl_command'] = 'cat'
 
   call ConvertWiki2Body()
   
@@ -32,5 +40,15 @@ Expect (Output with good newlines):
   </pre>
 
 
-Execute (restore):
-  let g:vimwiki_global_vars['listing_hl_command'] = g:bck_command
+Execute (Use the external highlighter output):
+  let g:vimwiki_global_vars['listing_hl_command'] = 'sed "s/print(/render(/g"'
+  call ConvertWiki2Body()
+  g/^\s*$/d
+
+Expect (Output comes from the external highlighter):
+  <pre type=py>
+  if (a == 2):
+      render("2")
+  else:
+      render("other")
+  </pre>

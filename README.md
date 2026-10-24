@@ -78,7 +78,7 @@ The result should look something like:
 
 ## Installation
 
-This fork targets macOS and Linux. Windows support has been removed.
+This fork supports macOS only.
 
 Only the latest stable releases of Vim and Neovim are supported. The current
 requirements are **Vim 9.2+** or **Neovim 0.12.6+**. Compatibility code and tests
